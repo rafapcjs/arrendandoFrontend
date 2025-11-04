@@ -8,6 +8,16 @@ import type {
   PaymentStats 
 } from '../types/PaymentModel';
 
+interface ErrorWithResponse {
+  response?: {
+    data?: unknown;
+  };
+}
+
+const isErrorWithResponse = (error: unknown): error is ErrorWithResponse => {
+  return typeof error === 'object' && error !== null && 'response' in error;
+}
+
 export const paymentService = {
   getAllPayments: async (filters?: PaymentFilters): Promise<Payment[]> => {
     try {
@@ -62,9 +72,11 @@ export const paymentService = {
       console.log('updatePayment - Data:', updateData);
       const { data } = await ApiIntance.patch<Payment>(`/pagos/${id}`, updateData);
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('updatePayment error:', error);
-      console.error('updatePayment error response:', error?.response?.data);
+      if (isErrorWithResponse(error)) {
+        console.error('updatePayment error response:', error.response?.data);
+      }
       throw error;
     }
   },

@@ -3,6 +3,25 @@ import { toast } from 'react-toastify';
 import { paymentService } from '../../service';
 import type { UpdatePaymentDto } from '../../types/PaymentModel';
 
+interface ErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+      error?: string;
+      errors?: string[];
+    } | string;
+  };
+  message?: string;
+}
+
+const isErrorWithResponse = (error: unknown): error is ErrorResponse => {
+  return typeof error === 'object' && error !== null && 'response' in error;
+}
+
+const isErrorWithMessage = (error: unknown): error is { message: string } => {
+  return typeof error === 'object' && error !== null && 'message' in error;
+}
+
 export const useUpdatePayment = () => {
   const queryClient = useQueryClient();
 
@@ -15,12 +34,12 @@ export const useUpdatePayment = () => {
       queryClient.invalidateQueries({ queryKey: ['payment-stats'] });
       toast.success('Pago actualizado exitosamente');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Update payment mutation error:', error);
       
       let message = 'Error al actualizar el pago';
       
-      if (error?.response?.data) {
+      if (isErrorWithResponse(error) && error.response?.data) {
         const errorData = error.response.data;
         console.error('Error details:', errorData);
         
@@ -34,7 +53,7 @@ export const useUpdatePayment = () => {
         } else if (Array.isArray(errorData.errors)) {
           message = errorData.errors.join(', ');
         }
-      } else if (error?.message) {
+      } else if (isErrorWithMessage(error)) {
         message = error.message;
       }
       

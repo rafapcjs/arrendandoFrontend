@@ -22,8 +22,8 @@ const dashboardItems = [
     icon: Users,
     href: "/admin",
     description: "Administra usuarios del sistema",
-    color: "bg-gradient-to-br from-blue-500 to-blue-600",
-    hoverColor: "hover:from-blue-600 hover:to-blue-700",
+    color: "bg-gradient-to-br from-slate-600 to-slate-700",
+    hoverColor: "hover:from-slate-700 hover:to-slate-800",
     category: "Usuarios",
     priority: "high"
   },
@@ -32,8 +32,8 @@ const dashboardItems = [
     icon: UserCheck,
     href: "/tenants",
     description: "Gestiona información de inquilinos",
-    color: "bg-gradient-to-br from-green-500 to-green-600",
-    hoverColor: "hover:from-green-600 hover:to-green-700",
+    color: "bg-gradient-to-br from-teal-500 to-cyan-600",
+    hoverColor: "hover:from-teal-600 hover:to-cyan-700",
     category: "Usuarios",
     priority: "high"
   },
@@ -42,8 +42,8 @@ const dashboardItems = [
     icon: Building2,
     href: "/properties",
     description: "Administra propiedades y ubicaciones",
-    color: "bg-gradient-to-br from-purple-500 to-purple-600",
-    hoverColor: "hover:from-purple-600 hover:to-purple-700",
+    color: "bg-gradient-to-br from-blue-600 to-indigo-700",
+    hoverColor: "hover:from-blue-700 hover:to-indigo-800",
     category: "Propiedades",
     priority: "high"
   },
@@ -52,8 +52,8 @@ const dashboardItems = [
     icon: FileText,
     href: "/contracts",
     description: "Administra contratos de arrendamiento",
-    color: "bg-gradient-to-br from-orange-500 to-orange-600",
-    hoverColor: "hover:from-orange-600 hover:to-orange-700",
+    color: "bg-gradient-to-br from-amber-500 to-orange-600",
+    hoverColor: "hover:from-amber-600 hover:to-orange-700",
     category: "Documentos",
     priority: "high"
   },
@@ -62,8 +62,8 @@ const dashboardItems = [
     icon: CreditCard,
     href: "/payments",
     description: "Controla pagos, abonos y estado de deudas",
-    color: "bg-gradient-to-br from-emerald-500 to-emerald-600",
-    hoverColor: "hover:from-emerald-600 hover:to-emerald-700",
+    color: "bg-gradient-to-br from-emerald-600 to-green-700",
+    hoverColor: "hover:from-emerald-700 hover:to-green-800",
     category: "Finanzas",
     priority: "high"
   },
@@ -72,8 +72,8 @@ const dashboardItems = [
     icon: BarChart3,
     href: "/reports",
     description: "Genera reportes y estadísticas",
-    color: "bg-gradient-to-br from-indigo-500 to-indigo-600",
-    hoverColor: "hover:from-indigo-600 hover:to-indigo-700",
+    color: "bg-gradient-to-br from-violet-600 to-purple-700",
+    hoverColor: "hover:from-violet-700 hover:to-purple-800",
     category: "Análisis",
     priority: "medium"
   },
@@ -91,19 +91,19 @@ export function DashboardGrid() {
   const mediumPriorityItems = dashboardItems.filter(item => item.priority === "medium")
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-blue-50">
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           {/* Welcome Section */}
           <div className="mb-8">
             <div className="relative overflow-hidden bg-white rounded-2xl shadow-xl border border-slate-200">
               {/* Background Pattern */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-indigo-500/5"></div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-400/10 to-purple-600/10 rounded-full -translate-y-32 translate-x-32"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-500/5 via-blue-500/5 to-indigo-500/5"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-slate-400/10 to-blue-600/10 rounded-full -translate-y-32 translate-x-32"></div>
               
               <div className="relative p-8">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl text-white shadow-lg">
+                  <div className="p-4 bg-gradient-to-r from-slate-600 to-blue-700 rounded-2xl text-white shadow-lg">
                     <Home className="w-8 h-8" />
                   </div>
                   <div>
@@ -115,7 +115,7 @@ export function DashboardGrid() {
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-indigo-50 p-6 rounded-xl border border-blue-200/50">
+                <div className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 p-6 rounded-xl border border-slate-200/50">
                   <div className="flex items-start gap-3 mb-3">
                     <Star className="w-6 h-6 text-yellow-500 fill-current flex-shrink-0 mt-1" />
                     <div>
@@ -127,13 +127,13 @@ export function DashboardGrid() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4 mt-4 pt-4 border-t border-blue-200/50">
+                  <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-200/50">
                     <div className="flex items-center gap-2 text-sm text-slate-600">
                       <Clock className="w-4 h-4" />
                       <span>Última actualización: Hoy</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-green-600">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <div className="flex items-center gap-2 text-sm text-emerald-600">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                       <span>Sistema operativo</span>
                     </div>
                   </div>
@@ -148,7 +148,7 @@ export function DashboardGrid() {
           {/* Acciones Principales */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
+              <div className="w-1 h-8 bg-gradient-to-b from-slate-600 to-blue-700 rounded-full"></div>
               <h2 className="text-2xl font-bold text-slate-800">Acciones Principales</h2>
               <div className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent"></div>
             </div>
@@ -159,18 +159,18 @@ export function DashboardGrid() {
                 return (
                   <Card
                     key={item.name}
-                    className="group cursor-pointer transition-all duration-500 hover:shadow-2xl hover:scale-105 bg-white border border-slate-200 overflow-hidden relative"
+                    className="group cursor-pointer transition-all duration-500 hover:shadow-2xl hover:scale-105 bg-white border-2 border-slate-200 hover:border-slate-300 overflow-hidden relative"
                     onClick={() => handleNavigation(item.href)}
                   >
                     {/* Priority indicator */}
-                    <div className="absolute top-4 right-4 w-3 h-3 bg-green-500 rounded-full shadow-lg"></div>
+                    <div className="absolute top-4 right-4 w-3 h-3 bg-emerald-500 rounded-full shadow-lg"></div>
                     
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-slate-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     
                     <div className="relative p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <div className={`w-14 h-14 rounded-xl ${item.color} ${item.hoverColor} flex items-center justify-center text-white transition-all duration-300 group-hover:scale-110 shadow-lg`}>
+                        <div className={`w-14 h-14 rounded-xl ${item.color} ${item.hoverColor} flex items-center justify-center text-white transition-all duration-300 group-hover:scale-110 shadow-lg ring-2 ring-white group-hover:ring-4 group-hover:ring-opacity-20`}>
                           <Icon className="w-7 h-7" strokeWidth={2} />
                         </div>
                         <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-1 transition-all duration-300" />
@@ -193,8 +193,11 @@ export function DashboardGrid() {
                       </div>
                     </div>
                     
-                    {/* Bottom accent */}
-                    <div className={`h-1 ${item.color} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}></div>
+                    {/* Bottom accent with dynamic color */}
+                    <div className={`h-2 ${item.color} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}></div>
+                    
+                    {/* Left border accent */}
+                    <div className={`absolute left-0 top-0 w-1 h-full ${item.color} transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top`}></div>
                   </Card>
                 )
               })}
@@ -215,12 +218,15 @@ export function DashboardGrid() {
                 return (
                   <Card
                     key={item.name}
-                    className="group cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-102 bg-white border border-slate-200 overflow-hidden"
+                    className="group cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-102 bg-white border-2 border-slate-200 hover:border-slate-300 overflow-hidden relative"
                     onClick={() => handleNavigation(item.href)}
                   >
+                    {/* Left border accent for medium priority */}
+                    <div className={`absolute left-0 top-0 w-1 h-full ${item.color} transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top`}></div>
+                    
                     <div className="p-6">
                       <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-lg ${item.color} ${item.hoverColor} flex items-center justify-center text-white transition-all duration-300 group-hover:scale-110 shadow-md`}>
+                        <div className={`w-12 h-12 rounded-lg ${item.color} ${item.hoverColor} flex items-center justify-center text-white transition-all duration-300 group-hover:scale-110 shadow-md ring-2 ring-white group-hover:ring-4 group-hover:ring-opacity-20`}>
                           <Icon className="w-6 h-6" strokeWidth={2} />
                         </div>
                         
@@ -242,6 +248,9 @@ export function DashboardGrid() {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Bottom accent bar */}
+                    <div className={`h-1 ${item.color} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`}></div>
                   </Card>
                 )
               })}
@@ -250,10 +259,13 @@ export function DashboardGrid() {
 
           {/* Footer */}
           <div className="mt-12">
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+            <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-slate-200 hover:border-slate-300 transition-colors duration-300 relative overflow-hidden group">
+              {/* Top accent bar */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-600 to-blue-700 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+              
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                  <div className="p-2 bg-gradient-to-r from-slate-600 to-blue-700 rounded-lg ring-2 ring-white shadow-md">
                     <Settings className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -262,8 +274,8 @@ export function DashboardGrid() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="flex items-center gap-2 text-sm text-green-600 mb-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="flex items-center gap-2 text-sm text-emerald-600 mb-1">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                     <span>Todo funcionando correctamente</span>
                   </div>
                   <p className="text-xs text-slate-500">Última verificación: Ahora</p>

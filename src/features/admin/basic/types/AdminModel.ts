@@ -15,7 +15,7 @@ export interface User {
     role: string;
     isActive: boolean;
     createdAt: string;
-    updatedAt: string;o
+    updatedAt: string;
 }
 
 export interface UsersResponse {

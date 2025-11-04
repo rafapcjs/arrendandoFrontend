@@ -9,14 +9,18 @@ import { ContractPanel } from "../../features/contracts/basic";
 import { ReportsPage } from "../../pages/reports";
 import PaymentsPage from "../../pages/payments";
 import { NotFoundPage } from "../../pages/not-found";
+import LandingPage from "../../pages/landyPage";
 import { ROUTES } from "../../shared/constants";
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing Page */}
+        <Route path={ROUTES.HOME} element={<LandingPage />} />
+
         {/* Login */}
-        <Route path={ROUTES.HOME} element={<LoginForm />} />
+        <Route path="/login" element={<LoginForm />} />
 
         {/* Dashboard principal */}
         <Route
