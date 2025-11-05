@@ -14,7 +14,7 @@ export const useSearchProperties = (searchParams: PropertySearchParams) => {
     return useQuery({
         queryKey: ['properties', 'search', searchParams],
         queryFn: () => searchProperties(searchParams),
-        enabled: !!(searchParams.search || searchParams.disponible !== undefined),
+        enabled: true, // Always enabled when called - the component controls when to use this query
         staleTime: 2 * 60 * 1000, // 2 minutes
     });
 };

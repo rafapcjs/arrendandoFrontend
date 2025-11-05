@@ -168,13 +168,6 @@ export const CreatePaymentModal: React.FC<CreatePaymentModalProps> = ({
               >
                 Cancelar
               </button>
-              <button
-                type="submit"
-                disabled={createPaymentMutation.isPending}
-                className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-              >
-                {createPaymentMutation.isPending ? 'Creando...' : 'Crear Pago'}
-              </button>
             </div>
           </form>
         </div>

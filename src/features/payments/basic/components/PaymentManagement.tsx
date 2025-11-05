@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, RefreshCw, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, RefreshCw, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from '../../../../shared/components/ui/card';
 import { usePayments } from '../query/payments';
 import { PaymentCard } from './PaymentCard';
@@ -217,13 +217,6 @@ export const PaymentManagement: React.FC = () => {
             >
               <RefreshCw className="w-5 h-5" />
             </button>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Nuevo Pago
-            </button>
           </div>
         </div>
       </Card>
@@ -242,17 +235,9 @@ export const PaymentManagement: React.FC = () => {
               <p className="text-slate-600">
                 {searchTerm || tenantSearchTerm || filters.estado 
                   ? 'Intenta ajustar los filtros de búsqueda' 
-                  : 'Comienza creando tu primer pago'}
+                  : 'No hay pagos disponibles'}
               </p>
             </div>
-            {!searchTerm && !tenantSearchTerm && !filters.estado && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Crear Primer Pago
-              </button>
-            )}
           </div>
         </Card>
       ) : (

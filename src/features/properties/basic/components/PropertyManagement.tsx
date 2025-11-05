@@ -27,16 +27,13 @@ export const PropertyManagement = () => {
         descripcion: ''
     });
     const [searchParams, setSearchParams] = useState<PropertySearchParams>({
-        page,
+        page: 1,
         limit
     });
     const [showSearch, setShowSearch] = useState(false);
 
     // Use regular properties query by default, search query when searching
-    const { data: propertiesData, isLoading, error } = useProperties(
-        showSearch ? undefined : page, 
-        showSearch ? undefined : limit
-    );
+    const { data: propertiesData, isLoading, error } = useProperties(page, limit);
     const { data: searchData, isLoading: searchLoading } = useSearchProperties(searchParams);
     
     // Use search data if searching, otherwise regular data
@@ -135,6 +132,7 @@ export const PropertyManagement = () => {
     };
 
     const handleSearch = () => {
+        // Always use search mode when the search button is clicked
         setShowSearch(true);
         setSearchParams({
             ...searchParams,

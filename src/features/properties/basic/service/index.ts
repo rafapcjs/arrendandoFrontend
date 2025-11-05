@@ -11,10 +11,13 @@ import type {
 export const getProperties = async (page?: number, limit?: number): Promise<PropertiesResponse> => {
     try {
         const params = new URLSearchParams();
-        if (page) params.append('page', page.toString());
-        if (limit) params.append('limit', limit.toString());
+        if (page !== undefined) params.append('page', page.toString());
+        if (limit !== undefined) params.append('limit', limit.toString());
         
-        const { data } = await ApiIntance.get<PropertiesResponse>(`/properties?${params.toString()}`);
+        const queryString = params.toString();
+        const url = queryString ? `/properties?${queryString}` : '/properties';
+        
+        const { data } = await ApiIntance.get<PropertiesResponse>(url);
         return data;
     } catch (error) {
         console.error(error);
@@ -64,12 +67,20 @@ export const deleteProperty = async (id: string): Promise<void> => {
 export const searchProperties = async (searchParams: PropertySearchParams): Promise<PropertiesResponse> => {
     try {
         const params = new URLSearchParams();
-        if (searchParams.search) params.append('search', searchParams.search);
+        if (searchParams.search?.trim()) params.append('search', searchParams.search.trim());
         if (searchParams.disponible !== undefined) params.append('disponible', searchParams.disponible.toString());
-        if (searchParams.page) params.append('page', searchParams.page.toString());
-        if (searchParams.limit) params.append('limit', searchParams.limit.toString());
+        if (searchParams.page !== undefined) params.append('page', searchParams.page.toString());
+        if (searchParams.limit !== undefined) params.append('limit', searchParams.limit.toString());
         
-        const { data } = await ApiIntance.get<PropertiesResponse>(`/properties/search?${params.toString()}`);
+        const queryString = params.toString();
+        // If no search criteria, use regular properties endpoint instead of search
+        if (!searchParams.search?.trim() && searchParams.disponible === undefined) {
+            return getProperties(searchParams.page, searchParams.limit);
+        }
+        
+        const url = queryString ? `/properties/search?${queryString}` : '/properties/search';
+        
+        const { data } = await ApiIntance.get<PropertiesResponse>(url);
         return data;
     } catch (error) {
         console.error(error);
