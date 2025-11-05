@@ -58,6 +58,29 @@ export const ContractManagement = () => {
     } : null;
     const { data: tenantsData } = useTenants();
     const { data: propertiesData } = useProperties();
+    
+    // Get active contracts to filter out occupied tenants and properties
+    const { data: activeContractsData } = useContracts({ estado: 'ACTIVO' });
+    
+    // Filter available tenants (exclude those with active contracts)
+    const availableTenants = tenantsData?.data.filter(tenant => {
+        if (!tenant.isActive) return false;
+        // Check if tenant has any active contract
+        const hasActiveContract = activeContractsData?.data.some(contract => 
+            contract.inquilinoId === tenant.id
+        );
+        return !hasActiveContract;
+    }) || [];
+    
+    // Filter available properties (exclude those with active contracts)
+    const availableProperties = propertiesData?.data.filter(property => {
+        if (!property.disponible) return false;
+        // Check if property has any active contract
+        const hasActiveContract = activeContractsData?.data.some(contract => 
+            contract.inmuebleId === property.id
+        );
+        return !hasActiveContract;
+    }) || [];
 
     const updateContractMutation = useUpdateContract();
     const deleteContractMutation = useDeleteContract();
@@ -549,7 +572,7 @@ export const ContractManagement = () => {
                                 required
                             >
                                 <option value="">Seleccionar inquilino</option>
-                                {tenantsData?.data.filter(tenant => tenant.isActive).map((tenant) => (
+                                {availableTenants.map((tenant) => (
                                     <option key={tenant.id} value={tenant.id}>
                                         {tenant.nombres} {tenant.apellidos} - {tenant.cedula}
                                     </option>
@@ -567,7 +590,7 @@ export const ContractManagement = () => {
                                 required
                             >
                                 <option value="">Seleccionar propiedad</option>
-                                {propertiesData?.data.filter(property => property.disponible).map((property) => (
+                                {availableProperties.map((property) => (
                                     <option key={property.id} value={property.id}>
                                         {property.direccion}
                                     </option>

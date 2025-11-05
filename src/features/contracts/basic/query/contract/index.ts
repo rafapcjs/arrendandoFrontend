@@ -23,7 +23,11 @@ export const useCreateContract = () => {
     return useMutation({
         mutationFn: (data: CreateContractDto) => createContract(data),
         onSuccess: () => {
+            // Invalidate contracts query
             queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            // Invalidate tenants and properties queries to refresh dropdowns
+            queryClient.invalidateQueries({ queryKey: ['tenants'] });
+            queryClient.invalidateQueries({ queryKey: ['properties'] });
             toast.success("Contrato creado exitosamente");
         },
         onError: (error) => {
