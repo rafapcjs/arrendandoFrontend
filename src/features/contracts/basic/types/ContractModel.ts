@@ -58,6 +58,7 @@ export interface ContractSearchParams {
     page?: number;
     limit?: number;
     estado?: ContratoEstado;
+    inquilinoNombre?: string;
 }
 
 export interface ActiveContract {

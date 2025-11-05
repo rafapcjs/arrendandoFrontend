@@ -31,8 +31,31 @@ export const ContractManagement = () => {
         page,
         limit
     });
+    const [searchInput, setSearchInput] = useState('');
+    const [activeSearchTerm, setActiveSearchTerm] = useState('');
 
-    const { data: contractsData, isLoading, error } = useContracts(searchParams);
+    // Get contracts without the inquilinoNombre filter (handle it in frontend)
+    const backendSearchParams = {
+        ...searchParams,
+        inquilinoNombre: undefined
+    };
+    const { data: contractsData, isLoading, error } = useContracts(backendSearchParams);
+
+    // Filter contracts in frontend based on tenant name
+    const filteredContracts = contractsData?.data.filter(contract => {
+        if (!activeSearchTerm.trim()) return true;
+        
+        const fullName = `${contract.inquilino.nombres} ${contract.inquilino.apellidos}`.toLowerCase();
+        return fullName.includes(activeSearchTerm.toLowerCase());
+    }) || [];
+
+    // Create filtered response object
+    const filteredContractsData = contractsData ? {
+        ...contractsData,
+        data: filteredContracts,
+        total: filteredContracts.length,
+        totalPages: Math.ceil(filteredContracts.length / (searchParams.limit || 10))
+    } : null;
     const { data: tenantsData } = useTenants();
     const { data: propertiesData } = useProperties();
 
@@ -153,6 +176,23 @@ export const ContractManagement = () => {
         }
     };
 
+    const handleSearch = () => {
+        setActiveSearchTerm(searchInput.trim());
+        setSearchParams(prev => ({
+            ...prev,
+            page: 1
+        }));
+    };
+
+    const clearSearch = () => {
+        setSearchInput('');
+        setActiveSearchTerm('');
+        setSearchParams({
+            page: 1,
+            limit: 10
+        });
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CO', {
             style: 'currency',
@@ -233,7 +273,7 @@ export const ContractManagement = () => {
                         <div>
                             <CardTitle className="text-green-800">Gestión de Contratos</CardTitle>
                             <CardDescription>
-                                Administra todos los contratos del sistema - Total: {contractsData?.total || 0} contratos
+                                Administra todos los contratos del sistema - Total: {filteredContractsData?.total || 0} contratos
                             </CardDescription>
                         </div>
                         <div className="flex gap-2">
@@ -247,10 +287,19 @@ export const ContractManagement = () => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {/* Filter Section */}
+                    {/* Search and Filter Section */}
                     <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                        <h3 className="font-semibold text-green-800 mb-3">Filtrar Contratos</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <h3 className="font-semibold text-green-800 mb-3">Buscar y Filtrar Contratos</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                            <div className="md:col-span-2">
+                                <Input
+                                    placeholder="Buscar por nombre del inquilino..."
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    className="border-green-300 focus:border-green-500"
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                />
+                            </div>
                             <select
                                 value={searchParams.estado || ''}
                                 onChange={(e) => setSearchParams(prev => ({ 
@@ -258,7 +307,7 @@ export const ContractManagement = () => {
                                     estado: e.target.value === '' ? undefined : e.target.value as ContratoEstado,
                                     page: 1
                                 }))}
-                                className="px-3 py-2 border border-input rounded-md"
+                                className="px-3 py-2 border border-input rounded-md border-green-300 focus:border-green-500"
                             >
                                 <option value="">Todos los estados</option>
                                 <option value="BORRADOR">Borrador</option>
@@ -268,10 +317,29 @@ export const ContractManagement = () => {
                                 <option value="FINALIZADO">Finalizado</option>
                             </select>
                         </div>
+                        <div className="flex gap-2">
+                            <Button 
+                                onClick={handleSearch}
+                                size="sm" 
+                                className="bg-green-600 hover:bg-green-700"
+                            >
+                                Buscar
+                            </Button>
+                            {(activeSearchTerm || searchParams.estado) && (
+                                <Button 
+                                    onClick={clearSearch}
+                                    size="sm" 
+                                    variant="outline"
+                                    className="border-green-300 text-green-700 hover:bg-green-50"
+                                >
+                                    Limpiar
+                                </Button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="space-y-4">
-                        {contractsData?.data.map((contract) => (
+                        {filteredContractsData?.data.map((contract) => (
                             <div key={contract.id} className="border rounded-lg p-4 hover:bg-green-50 transition-colors">
                                 <div className="flex justify-between items-start">
                                     <div className="space-y-2">
@@ -334,15 +402,15 @@ export const ContractManagement = () => {
                             </div>
                         ))}
 
-                        {contractsData?.data.length === 0 && (
+                        {filteredContractsData?.data.length === 0 && (
                             <div className="text-center py-8 text-gray-500">
-                                No hay contratos para mostrar
+                                {activeSearchTerm ? 'No se encontraron contratos con ese nombre de inquilino' : 'No hay contratos para mostrar'}
                             </div>
                         )}
                     </div>
 
                     {/* Pagination */}
-                    {contractsData && contractsData.totalPages > 1 && (
+                    {filteredContractsData && filteredContractsData.totalPages > 1 && (
                         <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-4 border-t gap-4">
                             <div className="flex items-center gap-2">
                                 <Button
@@ -367,10 +435,10 @@ export const ContractManagement = () => {
                             
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-gray-600 font-medium">
-                                    Página {searchParams.page} de {contractsData.totalPages}
+                                    Página {searchParams.page} de {filteredContractsData.totalPages}
                                 </span>
                                 <span className="text-xs text-gray-500 bg-green-100 px-2 py-1 rounded">
-                                    {contractsData.total} contratos total
+                                    {filteredContractsData.total} contratos total
                                 </span>
                             </div>
                             
@@ -378,8 +446,8 @@ export const ContractManagement = () => {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setSearchParams(prev => ({ ...prev, page: Math.min(contractsData.totalPages, (prev.page || 1) + 1) }))}
-                                    disabled={searchParams.page === contractsData.totalPages}
+                                    onClick={() => setSearchParams(prev => ({ ...prev, page: Math.min(filteredContractsData.totalPages, (prev.page || 1) + 1) }))}
+                                    disabled={searchParams.page === filteredContractsData.totalPages}
                                     className="border-green-300 text-green-700 hover:bg-green-50"
                                 >
                                     Siguiente
@@ -387,8 +455,8 @@ export const ContractManagement = () => {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => setSearchParams(prev => ({ ...prev, page: contractsData.totalPages }))}
-                                    disabled={searchParams.page === contractsData.totalPages}
+                                    onClick={() => setSearchParams(prev => ({ ...prev, page: filteredContractsData.totalPages }))}
+                                    disabled={searchParams.page === filteredContractsData.totalPages}
                                     className="border-green-300 text-green-700 hover:bg-green-50"
                                 >
                                     Última

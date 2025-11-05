@@ -38,6 +38,7 @@ export const getContracts = async (searchParams?: ContractSearchParams): Promise
         if (searchParams?.page) params.append('page', searchParams.page.toString());
         if (searchParams?.limit) params.append('limit', searchParams.limit.toString());
         if (searchParams?.estado) params.append('estado', searchParams.estado);
+        if (searchParams?.inquilinoNombre?.trim()) params.append('inquilinoNombre', searchParams.inquilinoNombre.trim());
         
         const { data } = await ApiIntance.get<ContractsResponse>(`/contratos?${params.toString()}`);
         return data;
