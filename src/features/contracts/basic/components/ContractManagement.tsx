@@ -410,16 +410,14 @@ export const ContractManagement = () => {
                                         >
                                             Editar
                                         </Button>
-                                        {contract.estado !== 'ACTIVO' && contract.estado !== 'PROXIMO_VENCER' && (
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                onClick={() => handleDelete(contract.id)}
-                                                disabled={deleteContractMutation.isPending}
-                                            >
-                                                Eliminar
-                                            </Button>
-                                        )}
+                                        <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={() => handleDelete(contract.id)}
+                                            disabled={deleteContractMutation.isPending}
+                                        >
+                                            Eliminar
+                                        </Button>
                                     </div>
                                 </div>
                             </div>

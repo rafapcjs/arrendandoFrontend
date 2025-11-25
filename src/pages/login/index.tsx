@@ -161,7 +161,7 @@ export function LoginForm() {
             <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4 shadow-lg">
               <Mail className="w-8 h-8 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-slate-800">¿Olvidaste tu contraseña?</CardTitle>
+            <CardTitle className="text-2xl font-bold text-slate-800"></CardTitle>
             <CardDescription className="text-base text-slate-600">
               No te preocupes, te enviaremos un enlace para recuperarla
             </CardDescription>
@@ -274,8 +274,7 @@ export function LoginForm() {
                   onClick={() => setShowForgotPassword(true)}
                   className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                 >
-                  ¿Olvidaste tu contraseña?
-                </button>
+                 </button>
               </div>
 
               {error && (
