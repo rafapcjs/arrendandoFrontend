@@ -17,6 +17,7 @@ export const PropertyManagement = () => {
     const [editingProperty, setEditingProperty] = useState<Property | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editForm, setEditForm] = useState<UpdatePropertyDto>({});
+    const [editPhotoPreview, setEditPhotoPreview] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createForm, setCreateForm] = useState<CreatePropertyDto>({
         direccion: '',
@@ -26,6 +27,7 @@ export const PropertyManagement = () => {
         disponible: true,
         descripcion: ''
     });
+    const [createPhotoPreview, setCreatePhotoPreview] = useState<string | null>(null);
     const [searchParams, setSearchParams] = useState<PropertySearchParams>({
         page: 1,
         limit
@@ -55,7 +57,32 @@ export const PropertyManagement = () => {
             disponible: property.disponible,
             descripcion: property.descripcion,
         });
+        setEditPhotoPreview(property.fotoUrl || null);
         setShowEditModal(true);
+    };
+
+    const handleCreatePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setCreateForm(prev => ({ ...prev, foto: file }));
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCreatePhotoPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleEditPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setEditForm(prev => ({ ...prev, foto: file }));
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setEditPhotoPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleUpdate = async () => {
@@ -126,6 +153,7 @@ export const PropertyManagement = () => {
                 disponible: true,
                 descripcion: ''
             });
+            setCreatePhotoPreview(null);
         } catch (error) {
             console.error('Error creating property:', error);
         }
@@ -239,15 +267,24 @@ export const PropertyManagement = () => {
                     <div className="space-y-4">
                         {currentData?.data.map((property) => (
                             <div key={property.id} className="border rounded-lg p-4 hover:bg-purple-50 transition-colors">
-                                <div className="flex justify-between items-start">
-                                    <div className="space-y-2">
+                                <div className="flex justify-between items-start gap-4">
+                                    {property.fotoUrl && (
+                                        <div className="flex-shrink-0">
+                                            <img
+                                                src={property.fotoUrl}
+                                                alt={property.direccion}
+                                                className="w-32 h-32 object-cover rounded-lg border border-gray-200"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="space-y-2 flex-grow">
                                         <div className="flex items-center gap-3">
                                             <h3 className="font-semibold text-lg text-purple-800">
                                                 {property.direccion}
                                             </h3>
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                property.disponible 
-                                                    ? 'bg-green-100 text-green-800' 
+                                                property.disponible
+                                                    ? 'bg-green-100 text-green-800'
                                                     : 'bg-red-100 text-red-800'
                                             }`}>
                                                 {property.disponible ? 'Disponible' : 'No disponible'}
@@ -270,7 +307,7 @@ export const PropertyManagement = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2 flex-wrap">
+                                    <div className="flex gap-2 flex-wrap flex-shrink-0">
                                         <Button
                                             size="sm"
                                             variant="outline"
@@ -457,7 +494,23 @@ export const PropertyManagement = () => {
                                 placeholder="Apartamento moderno con vista panorámica"
                             />
                         </div>
-                        
+
+                        <div>
+                            <Label htmlFor="createFoto">Foto del Inmueble (JPG/PNG)</Label>
+                            <div className="flex items-center gap-3">
+                                <Input
+                                    id="createFoto"
+                                    type="file"
+                                    accept="image/jpeg,image/png"
+                                    onChange={handleCreatePhotoChange}
+                                    className="flex-1"
+                                />
+                                {createPhotoPreview && (
+                                    <img src={createPhotoPreview} alt="Vista previa" className="w-16 h-16 object-cover rounded border border-gray-200" />
+                                )}
+                            </div>
+                        </div>
+
                         <div className="bg-purple-50 p-3 rounded-lg">
                             <Label className="text-purple-800 font-medium">Disponibilidad</Label>
                             <p className="text-sm text-purple-600 mt-1">Disponible (El inmueble estará disponible por defecto)</p>
@@ -465,8 +518,8 @@ export const PropertyManagement = () => {
                     </div>
                     
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowCreateModal(false);
                                 setCreateForm({
@@ -477,6 +530,7 @@ export const PropertyManagement = () => {
                                     disponible: true,
                                     descripcion: ''
                                 });
+                                setCreatePhotoPreview(null);
                             }}
                             disabled={createPropertyMutation.isPending}
                         >
@@ -553,7 +607,23 @@ export const PropertyManagement = () => {
                                 placeholder="Apartamento moderno con vista panorámica"
                             />
                         </div>
-                        
+
+                        <div>
+                            <Label htmlFor="editFoto">Foto del Inmueble (JPG/PNG) - Opcional</Label>
+                            <div className="flex items-center gap-3">
+                                <Input
+                                    id="editFoto"
+                                    type="file"
+                                    accept="image/jpeg,image/png"
+                                    onChange={handleEditPhotoChange}
+                                    className="flex-1"
+                                />
+                                {editPhotoPreview && (
+                                    <img src={editPhotoPreview} alt="Vista previa" className="w-16 h-16 object-cover rounded border border-gray-200" />
+                                )}
+                            </div>
+                        </div>
+
                         <div className="bg-purple-50 p-3 rounded-lg">
                             <Label className="text-purple-800 font-medium">Inmueble Actual</Label>
                             <p className="text-sm text-purple-600 mt-1">{editingProperty?.direccion}</p>
@@ -561,12 +631,13 @@ export const PropertyManagement = () => {
                     </div>
                     
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowEditModal(false);
                                 setEditingProperty(null);
                                 setEditForm({});
+                                setEditPhotoPreview(null);
                             }}
                             disabled={updatePropertyMutation.isPending}
                         >

@@ -6,6 +6,7 @@ export interface Property {
     codigoServicioLuz: string;
     disponible: boolean;
     descripcion: string;
+    fotoUrl?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -25,6 +26,7 @@ export interface CreatePropertyDto {
     codigoServicioLuz: string;
     disponible?: boolean;
     descripcion?: string;
+    foto?: File;
 }
 
 export interface UpdatePropertyDto {
@@ -34,6 +36,7 @@ export interface UpdatePropertyDto {
     codigoServicioLuz?: string;
     disponible?: boolean;
     descripcion?: string;
+    foto?: File;
 }
 
 export interface ActivatePropertyDto {

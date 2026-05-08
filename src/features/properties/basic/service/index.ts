@@ -37,7 +37,27 @@ export const getPropertyById = async (id: string): Promise<Property> => {
 
 export const createProperty = async (propertyData: CreatePropertyDto): Promise<Property> => {
     try {
-        const { data } = await ApiIntance.post<Property>("/properties", propertyData);
+        let payload: CreatePropertyDto | FormData;
+
+        if (propertyData.foto) {
+            const formData = new FormData();
+            formData.append('direccion', propertyData.direccion);
+            formData.append('codigoServicioAgua', propertyData.codigoServicioAgua);
+            formData.append('codigoServicioGas', propertyData.codigoServicioGas);
+            formData.append('codigoServicioLuz', propertyData.codigoServicioLuz);
+            if (propertyData.disponible !== undefined) {
+                formData.append('disponible', propertyData.disponible.toString());
+            }
+            if (propertyData.descripcion) {
+                formData.append('descripcion', propertyData.descripcion);
+            }
+            formData.append('foto', propertyData.foto);
+            payload = formData;
+        } else {
+            payload = propertyData;
+        }
+
+        const { data } = await ApiIntance.post<Property>("/properties", payload);
         return data;
     } catch (error) {
         console.error(error);
@@ -47,7 +67,23 @@ export const createProperty = async (propertyData: CreatePropertyDto): Promise<P
 
 export const updateProperty = async (id: string, updateData: UpdatePropertyDto): Promise<Property> => {
     try {
-        const { data } = await ApiIntance.patch<Property>(`/properties/${id}`, updateData);
+        let payload: UpdatePropertyDto | FormData;
+
+        if (updateData.foto) {
+            const formData = new FormData();
+            if (updateData.direccion) formData.append('direccion', updateData.direccion);
+            if (updateData.codigoServicioAgua) formData.append('codigoServicioAgua', updateData.codigoServicioAgua);
+            if (updateData.codigoServicioGas) formData.append('codigoServicioGas', updateData.codigoServicioGas);
+            if (updateData.codigoServicioLuz) formData.append('codigoServicioLuz', updateData.codigoServicioLuz);
+            if (updateData.disponible !== undefined) formData.append('disponible', updateData.disponible.toString());
+            if (updateData.descripcion) formData.append('descripcion', updateData.descripcion);
+            formData.append('foto', updateData.foto);
+            payload = formData;
+        } else {
+            payload = updateData;
+        }
+
+        const { data } = await ApiIntance.patch<Property>(`/properties/${id}`, payload);
         return data;
     } catch (error) {
         console.error(error);
