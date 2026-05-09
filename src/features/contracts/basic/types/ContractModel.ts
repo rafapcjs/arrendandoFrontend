@@ -1,5 +1,13 @@
 export type ContratoEstado = 'BORRADOR' | 'ACTIVO' | 'PROXIMO_VENCER' | 'VENCIDO' | 'FINALIZADO';
 
+export interface ContratoDocumento {
+  docId: string;
+  url: string;
+  nombre: string;
+  tipo: string;
+  subidoEn: string;
+}
+
 export interface Inquilino {
     id: string;
     nombres: string;
@@ -24,6 +32,7 @@ export interface Contract {
     inmuebleId: string;
     inquilino: Inquilino;
     inmueble: Inmueble;
+    documentos: ContratoDocumento[];
     createdAt: string;
     updatedAt: string;
 }

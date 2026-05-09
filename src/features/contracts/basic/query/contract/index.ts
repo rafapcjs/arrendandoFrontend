@@ -1,10 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { 
-    getContractById, 
-    createContract, 
-    updateContract, 
-    deleteContract 
+import {
+    getContractById,
+    createContract,
+    updateContract,
+    deleteContract,
+    uploadContractDocument,
+    replaceContractDocument,
+    deleteContractDocument,
 } from '../../service';
 import type { CreateContractDto, UpdateContractDto } from '../../types/ContractModel';
 
@@ -57,7 +60,7 @@ export const useUpdateContract = () => {
 
 export const useDeleteContract = () => {
     const queryClient = useQueryClient();
-    
+
     return useMutation({
         mutationFn: (id: string) => deleteContract(id),
         onSuccess: () => {
@@ -72,6 +75,57 @@ export const useDeleteContract = () => {
         onError: (error) => {
             console.error('Delete contract error:', error);
             toast.error("Error al eliminar el contrato");
+        },
+    });
+};
+
+export const useUploadContractDocument = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ contractId, file }: { contractId: string; file: File }) =>
+            uploadContractDocument(contractId, file),
+        onSuccess: (updatedContract) => {
+            queryClient.setQueryData(['contracts', updatedContract.id], updatedContract);
+            queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            toast.success("Documento subido exitosamente");
+        },
+        onError: () => {
+            toast.error("Error al subir el documento");
+        },
+    });
+};
+
+export const useReplaceContractDocument = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ contractId, docId, file }: { contractId: string; docId: string; file: File }) =>
+            replaceContractDocument(contractId, docId, file),
+        onSuccess: (updatedContract) => {
+            queryClient.setQueryData(['contracts', updatedContract.id], updatedContract);
+            queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            toast.success("Documento reemplazado exitosamente");
+        },
+        onError: () => {
+            toast.error("Error al reemplazar el documento");
+        },
+    });
+};
+
+export const useDeleteContractDocument = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ contractId, docId }: { contractId: string; docId: string }) =>
+            deleteContractDocument(contractId, docId),
+        onSuccess: (updatedContract) => {
+            queryClient.setQueryData(['contracts', updatedContract.id], updatedContract);
+            queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            toast.success("Documento eliminado exitosamente");
+        },
+        onError: () => {
+            toast.error("Error al eliminar el documento");
         },
     });
 };

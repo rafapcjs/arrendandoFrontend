@@ -126,6 +126,25 @@ export const checkPropertyHasActiveContract = async (propertyId: string): Promis
     }
 }
 
+export const uploadContractDocument = async (contractId: string, file: File): Promise<Contract> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await ApiIntance.post<Contract>(`/contratos/${contractId}/documentos`, formData);
+    return data;
+}
+
+export const replaceContractDocument = async (contractId: string, docId: string, file: File): Promise<Contract> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await ApiIntance.patch<Contract>(`/contratos/${contractId}/documentos/${docId}`, formData);
+    return data;
+}
+
+export const deleteContractDocument = async (contractId: string, docId: string): Promise<Contract> => {
+    const { data } = await ApiIntance.delete<Contract>(`/contratos/${contractId}/documentos/${docId}`);
+    return data;
+}
+
 export const checkTenantHasActiveContract = async (tenantId: string): Promise<boolean> => {
     try {
         const contractsResponse = await getContracts({ estado: 'ACTIVO' });

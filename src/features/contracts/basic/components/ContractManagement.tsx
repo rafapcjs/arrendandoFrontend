@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useContracts } from '../query/contracts';
-import { useUpdateContract, useDeleteContract, useCreateContract } from '../query/contract';
+import { useUpdateContract, useDeleteContract, useCreateContract, useUploadContractDocument, useReplaceContractDocument, useDeleteContractDocument } from '../query/contract';
 import { useTenants } from '../../../tenants/basic/query/tenants';
 import { useProperties } from '../../../properties/basic/query/properties';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../../shared/components/ui/card';
@@ -10,7 +10,8 @@ import { Label } from '../../../../shared/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../../../shared/components/ui/dialog';
 import { confirmDialog } from '../../../../shared/lib/confirmDialog';
 import { toast } from 'react-toastify';
-import type { Contract, UpdateContractDto, CreateContractDto, ContractSearchParams, ContratoEstado } from '../types/ContractModel';
+import { ChevronDown, ChevronUp, Upload, Eye, Trash2, RefreshCw, Paperclip, X } from 'lucide-react';
+import type { Contract, UpdateContractDto, CreateContractDto, ContractSearchParams, ContratoEstado, ContratoDocumento } from '../types/ContractModel';
 
 export const ContractManagement = () => {
     const [page] = useState(1);
@@ -82,9 +83,22 @@ export const ContractManagement = () => {
         return !hasActiveContract;
     }) || [];
 
+    const [expandedContractId, setExpandedContractId] = useState<string | null>(null);
+    const [previewDoc, setPreviewDoc] = useState<ContratoDocumento | null>(null);
+    const [_previewContractId, setPreviewContractId] = useState<string | null>(null);
+    const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
+    const [replacingDoc, setReplacingDoc] = useState<{ contractId: string; docId: string } | null>(null);
+    const [uploadingForContractId, setUploadingForContractId] = useState<string | null>(null);
+    const uploadInputRef = useRef<HTMLInputElement>(null);
+    const replaceInputRef = useRef<HTMLInputElement>(null);
+
     const updateContractMutation = useUpdateContract();
     const deleteContractMutation = useDeleteContract();
     const createContractMutation = useCreateContract();
+    const uploadDocMutation = useUploadContractDocument();
+    const replaceDocMutation = useReplaceContractDocument();
+    const deleteDocMutation = useDeleteContractDocument();
 
     const handleEdit = (contract: Contract) => {
         setEditingContract(contract);
@@ -197,6 +211,91 @@ export const ContractManagement = () => {
         } catch (error: unknown) {
             console.error('Error creating contract:', error);
         }
+    };
+
+    const handleUploadClick = (contractId: string) => {
+        setUploadingForContractId(contractId);
+        uploadInputRef.current!.value = '';
+        uploadInputRef.current?.click();
+    };
+
+    const handleUploadFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !uploadingForContractId) return;
+        try {
+            await uploadDocMutation.mutateAsync({ contractId: uploadingForContractId, file });
+        } catch {
+            // error handled in mutation
+        }
+        setUploadingForContractId(null);
+    };
+
+    const handleReplaceClick = (contractId: string, docId: string) => {
+        setReplacingDoc({ contractId, docId });
+        replaceInputRef.current!.value = '';
+        replaceInputRef.current?.click();
+    };
+
+    const handleReplaceFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !replacingDoc) return;
+        try {
+            await replaceDocMutation.mutateAsync({ contractId: replacingDoc.contractId, docId: replacingDoc.docId, file });
+        } catch {
+            // error handled in mutation
+        }
+        setReplacingDoc(null);
+    };
+
+    const handleDeleteDocument = (contractId: string, docId: string, nombre: string) => {
+        confirmDialog({
+            title: '¿Eliminar documento?',
+            message: `¿Estás seguro de que quieres eliminar "${nombre}"? Esta acción no se puede deshacer.`,
+            confirmText: 'Eliminar',
+            cancelText: 'Cancelar',
+            onConfirm: async () => {
+                try {
+                    await deleteDocMutation.mutateAsync({ contractId, docId });
+                } catch {
+                    // error handled in mutation
+                }
+            }
+        });
+    };
+
+    const getDocIcon = (tipo: string) => {
+        if (tipo.includes('pdf')) return '📄';
+        if (tipo.includes('word') || tipo.includes('document')) return '📝';
+        if (tipo.includes('image')) return '🖼️';
+        return '📎';
+    };
+
+    const handleOpenPreview = async (contractId: string, doc: ContratoDocumento) => {
+        setPreviewDoc(doc);
+        setPreviewContractId(contractId);
+        if (doc.tipo.startsWith('image/')) return;
+
+        setPreviewLoading(true);
+        try {
+            const { ApiIntance } = await import('../../../../infrastructure/api');
+            const res = await ApiIntance.get(
+                `/contratos/${contractId}/documentos/${doc.docId}/stream`,
+                { responseType: 'blob' }
+            );
+            const blobUrl = URL.createObjectURL(new Blob([res.data], { type: doc.tipo }));
+            setPreviewBlobUrl(blobUrl);
+        } catch {
+            toast.error('No se pudo cargar la vista previa');
+        } finally {
+            setPreviewLoading(false);
+        }
+    };
+
+    const handleClosePreview = () => {
+        if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl);
+        setPreviewDoc(null);
+        setPreviewContractId(null);
+        setPreviewBlobUrl(null);
     };
 
     const handleSearch = () => {
@@ -363,63 +462,132 @@ export const ContractManagement = () => {
 
                     <div className="space-y-4">
                         {filteredContractsData?.data.map((contract) => (
-                            <div key={contract.id} className="border rounded-lg p-4 hover:bg-green-50 transition-colors">
-                                <div className="flex justify-between items-start">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-3">
-                                            <h3 className="font-semibold text-lg text-green-800">
-                                                Contrato #{contract.id.slice(-8)}
-                                            </h3>
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(contract.estado)}`}>
-                                                {getStatusText(contract.estado)}
-                                            </span>
+                            <div key={contract.id} className="border rounded-lg hover:bg-green-50 transition-colors overflow-hidden">
+                                <div className="p-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="space-y-2 flex-1">
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="font-semibold text-lg text-green-800">
+                                                    Contrato #{contract.id.slice(-8)}
+                                                </h3>
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(contract.estado)}`}>
+                                                    {getStatusText(contract.estado)}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                                <p className="text-gray-600">
+                                                    <span className="font-medium">Inquilino:</span> {contract.inquilino.nombres} {contract.inquilino.apellidos}
+                                                </p>
+                                                <p className="text-gray-600">
+                                                    <span className="font-medium">Propiedad:</span> {contract.inmueble.direccion}
+                                                </p>
+                                                <p className="text-gray-600">
+                                                    <span className="font-medium">Canon Mensual:</span> {formatCurrency(contract.canonMensual)}
+                                                </p>
+                                                <p className="text-gray-600">
+                                                    <span className="font-medium">Vigencia:</span> {new Date(contract.fechaInicio).toLocaleDateString()} - {new Date(contract.fechaFin).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                                                <span>Creado: {new Date(contract.createdAt).toLocaleDateString()}</span>
+                                                <span>Actualizado: {new Date(contract.updatedAt).toLocaleDateString()}</span>
+                                            </div>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">Inquilino:</span> {contract.inquilino.nombres} {contract.inquilino.apellidos}
-                                            </p>
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">Propiedad:</span> {contract.inmueble.direccion}
-                                            </p>
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">Canon Mensual:</span> {formatCurrency(contract.canonMensual)}
-                                            </p>
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">Vigencia:</span> {new Date(contract.fechaInicio).toLocaleDateString()} - {new Date(contract.fechaFin).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                        <p className="text-gray-600 text-sm">
-                                            <span className="font-medium">Dirección:</span> {contract.inmueble.direccion}
-                                        </p>
-                                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                                            <span>
-                                                Creado: {new Date(contract.createdAt).toLocaleDateString()}
-                                            </span>
-                                            <span>
-                                                Actualizado: {new Date(contract.updatedAt).toLocaleDateString()}
-                                            </span>
+                                        <div className="flex gap-2 flex-wrap ml-4">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleEdit(contract)}
+                                                disabled={updateContractMutation.isPending}
+                                                className="border-green-300 text-green-700 hover:bg-green-50"
+                                            >
+                                                Editar
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                onClick={() => handleDelete(contract.id)}
+                                                disabled={deleteContractMutation.isPending}
+                                            >
+                                                Eliminar
+                                            </Button>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2 flex-wrap">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => handleEdit(contract)}
-                                            disabled={updateContractMutation.isPending}
-                                            className="border-green-300 text-green-700 hover:bg-green-50"
-                                        >
-                                            Editar
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="destructive"
-                                            onClick={() => handleDelete(contract.id)}
-                                            disabled={deleteContractMutation.isPending}
-                                        >
-                                            Eliminar
-                                        </Button>
-                                    </div>
+
+                                    {/* Toggle documentos */}
+                                    <button
+                                        onClick={() => setExpandedContractId(expandedContractId === contract.id ? null : contract.id)}
+                                        className="mt-3 flex items-center gap-2 text-sm font-medium text-green-700 hover:text-green-900 transition-colors"
+                                    >
+                                        <Paperclip className="w-4 h-4" />
+                                        Documentos ({contract.documentos?.length ?? 0})
+                                        {expandedContractId === contract.id
+                                            ? <ChevronUp className="w-4 h-4" />
+                                            : <ChevronDown className="w-4 h-4" />
+                                        }
+                                    </button>
                                 </div>
+
+                                {/* Sección documentos expandida */}
+                                {expandedContractId === contract.id && (
+                                    <div className="border-t border-green-100 bg-green-50 px-4 py-3 space-y-2">
+                                        {contract.documentos?.length === 0 && (
+                                            <p className="text-sm text-gray-500 italic">No hay documentos adjuntos.</p>
+                                        )}
+
+                                        {contract.documentos?.map((doc) => (
+                                            <div key={doc.docId} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-green-100">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="text-lg flex-shrink-0">{getDocIcon(doc.tipo)}</span>
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-medium text-gray-800 truncate max-w-xs">{doc.nombre}</p>
+                                                        <p className="text-xs text-gray-400">{new Date(doc.subidoEn).toLocaleDateString()}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-1 flex-shrink-0 ml-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-7 px-2 text-xs border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                        onClick={() => handleOpenPreview(contract.id, doc)}
+                                                    >
+                                                        <Eye className="w-3 h-3 mr-1" /> Ver
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-7 px-2 text-xs border-amber-200 text-amber-700 hover:bg-amber-50"
+                                                        onClick={() => handleReplaceClick(contract.id, doc.docId)}
+                                                        disabled={replaceDocMutation.isPending}
+                                                    >
+                                                        <RefreshCw className="w-3 h-3 mr-1" /> Reemplazar
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-7 px-2 text-xs border-red-200 text-red-700 hover:bg-red-50"
+                                                        onClick={() => handleDeleteDocument(contract.id, doc.docId, doc.nombre)}
+                                                        disabled={deleteDocMutation.isPending}
+                                                    >
+                                                        <Trash2 className="w-3 h-3 mr-1" /> Eliminar
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        <Button
+                                            size="sm"
+                                            className="mt-1 bg-green-600 hover:bg-green-700 h-8 text-xs"
+                                            onClick={() => handleUploadClick(contract.id)}
+                                            disabled={uploadDocMutation.isPending && uploadingForContractId === contract.id}
+                                        >
+                                            <Upload className="w-3 h-3 mr-1" />
+                                            {uploadDocMutation.isPending && uploadingForContractId === contract.id
+                                                ? 'Subiendo...'
+                                                : 'Subir documento'}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         ))}
 
@@ -625,6 +793,82 @@ export const ContractManagement = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Modal preview de documento */}
+            {previewDoc && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl flex flex-col w-full max-w-4xl" style={{ height: '90vh' }}>
+                        <div className="flex items-center justify-between px-4 py-3 border-b">
+                            <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-lg">{getDocIcon(previewDoc.tipo)}</span>
+                                <p className="font-medium text-gray-800 truncate">{previewDoc.nombre}</p>
+                            </div>
+                            <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs"
+                                    onClick={() => window.open(previewDoc.url, '_blank')}
+                                >
+                                    Descargar
+                                </Button>
+                                <button
+                                    onClick={handleClosePreview}
+                                    className="p-1 rounded hover:bg-gray-100 transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-gray-600" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-hidden rounded-b-xl">
+                            {previewDoc.tipo.startsWith('image/') ? (
+                                <div className="h-full flex items-center justify-center bg-gray-50 p-4">
+                                    <img
+                                        src={previewDoc.url}
+                                        alt={previewDoc.nombre}
+                                        className="max-h-full max-w-full object-contain rounded"
+                                    />
+                                </div>
+                            ) : previewLoading ? (
+                                <div className="h-full flex flex-col items-center justify-center gap-3 text-gray-500">
+                                    <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin" />
+                                    <p className="text-sm">Cargando documento...</p>
+                                </div>
+                            ) : previewBlobUrl ? (
+                                <iframe
+                                    src={previewBlobUrl}
+                                    className="w-full h-full border-0"
+                                    title={previewDoc.nombre}
+                                />
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center gap-3 text-gray-500">
+                                    <p className="text-sm">No se pudo cargar la vista previa.</p>
+                                    <Button size="sm" onClick={() => window.open(previewDoc.url, '_blank')}>
+                                        Descargar archivo
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Inputs ocultos para subir/reemplazar documentos */}
+            <input
+                ref={uploadInputRef}
+                type="file"
+                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleUploadFileSelected}
+            />
+            <input
+                ref={replaceInputRef}
+                type="file"
+                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleReplaceFileSelected}
+            />
 
             {/* Edit Contract Modal */}
             <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
