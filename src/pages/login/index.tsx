@@ -274,7 +274,8 @@ export function LoginForm() {
                   onClick={() => setShowForgotPassword(true)}
                   className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                 >
-                 </button>
+                  ¿Olvidaste tu contraseña?
+                </button>
               </div>
 
               {error && (

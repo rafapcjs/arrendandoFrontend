@@ -1,9 +1,20 @@
 import { ApiIntance } from "../../../../infrastructure/api";
 import type {
     Inmobiliaria,
+    InmobiliariaDisponible,
     CreateInmobiliariaDto,
     UpdateInmobiliariaDto,
 } from "../types/InmobiliariaModel";
+
+export const getInmobiliariasDisponibles = async (): Promise<InmobiliariaDisponible[]> => {
+    try {
+        const { data } = await ApiIntance.get<InmobiliariaDisponible[]>('/inmobiliarias/disponibles');
+        return data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
 
 export const getInmobiliarias = async (): Promise<Inmobiliaria[]> => {
     try {

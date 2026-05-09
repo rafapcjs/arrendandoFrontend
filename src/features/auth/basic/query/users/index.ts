@@ -45,6 +45,7 @@ export const useActivateUser = () => {
             activateUser(id, data),
         onSuccess: (updatedUser) => {
             queryClient.invalidateQueries({ queryKey: ['auth', 'users'] });
+            queryClient.invalidateQueries({ queryKey: ['inmobiliarias'] });
             queryClient.setQueryData(['auth', 'users', updatedUser.id], updatedUser);
             toast.success("Usuario activado exitosamente");
         },

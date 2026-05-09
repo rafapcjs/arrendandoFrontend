@@ -13,8 +13,8 @@ export const useRegister = () => {
       console.log("Registro exitoso:", data);
       toast.success("Usuario registrado exitosamente");
 
-      // Refresca los datos relacionados con los usuarios administradores
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["inmobiliarias", "disponibles"] });
     },
 
     onError: (error) => {

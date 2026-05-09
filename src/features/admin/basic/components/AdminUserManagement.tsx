@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAdminUsers } from '../query/users';
 import { useAdminUpdateUser, useAdminActivateUser, useAdminDeleteUser } from '../query/user';
 import { useRegister } from '../../../auth/basic/query/register';
-import { useInmobiliarias } from '../../../inmobiliarias/basic';
+import { useInmobiliariasDisponibles } from '../../../inmobiliarias/basic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../../shared/components/ui/card';
 import { Button } from '../../../../shared/components/ui/button';
 import { Input } from '../../../../shared/components/ui/input';
@@ -27,7 +27,7 @@ export const AdminUserManagement = () => {
         role: 'ADMIN'
     });
 
-    const { data: inmobiliarias } = useInmobiliarias();
+    const { data: inmobiliarias } = useInmobiliariasDisponibles();
 
     const { data: usersData, isLoading, error } = useAdminUsers(page, limit);
     const updateUserMutation = useAdminUpdateUser();

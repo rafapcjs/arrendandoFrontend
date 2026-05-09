@@ -1,5 +1,12 @@
 export type InmobiliariaEstado = 'ACTIVA' | 'INACTIVA';
 
+export interface InmobiliariaDisponible {
+    id: string;
+    nombre: string;
+    nit: string;
+    estado: InmobiliariaEstado;
+}
+
 export interface Inmobiliaria {
     id: string;
     nombre: string;

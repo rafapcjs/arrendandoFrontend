@@ -17,6 +17,7 @@ ApiIntance.interceptors.response.use(
     if (!isAuthEndpoint && error.response?.status === 401) {
       sessionStorage.clear();
       localStorage.clear();
+      // El caché de React Query se limpia automáticamente al recargar la página
       window.location.href = '/login';
     }
     return Promise.reject(error);

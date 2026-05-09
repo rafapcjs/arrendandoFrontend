@@ -1,32 +1,47 @@
 import { Card } from "@/shared/components/ui/card"
 import { useNavigate } from "react-router-dom"
-import { 
-  Users, 
-  UserCheck, 
-  Building2, 
-  BarChart3, 
-  Home, 
+import {
+  UserCheck,
+  Building2,
+  Building,
+  BarChart3,
+  Home,
   Star,
   ArrowRight,
   Clock,
   Shield,
   Settings,
   FileText,
-  CreditCard
+  CreditCard,
+  Users
 } from "lucide-react"
 import { DashboardStats } from "@/features/dashboard/basic/components/DashboardStats"
+import { isAdmin } from "@/shared/lib/session"
 
-const dashboardItems = [
+const adminItems = [
   {
-    name: "Gestionar Administradores",
+    name: "Gestionar Usuarios",
     icon: Users,
-    href: "/admin",
-    description: "Administra usuarios del sistema",
-    color: "bg-gradient-to-br from-slate-600 to-slate-700",
-    hoverColor: "hover:from-slate-700 hover:to-slate-800",
+    href: "/users",
+    description: "Administra usuarios y roles del sistema",
+    color: "bg-gradient-to-br from-blue-600 to-indigo-700",
+    hoverColor: "hover:from-blue-700 hover:to-indigo-800",
     category: "Usuarios",
     priority: "high"
   },
+  {
+    name: "Gestionar Inmobiliarias",
+    icon: Building,
+    href: "/inmobiliarias",
+    description: "Administra las inmobiliarias registradas",
+    color: "bg-gradient-to-br from-violet-600 to-purple-700",
+    hoverColor: "hover:from-violet-700 hover:to-purple-800",
+    category: "Inmobiliarias",
+    priority: "high"
+  },
+]
+
+const inmobiliariaItems = [
   {
     name: "Gestionar Inquilinos",
     icon: UserCheck,
@@ -81,12 +96,12 @@ const dashboardItems = [
 
 export function DashboardGrid() {
   const navigate = useNavigate()
+  const dashboardItems = isAdmin() ? adminItems : inmobiliariaItems
 
   const handleNavigation = (href: string) => {
     navigate(href)
   }
 
-  // Agrupar items por categoría
   const highPriorityItems = dashboardItems.filter(item => item.priority === "high")
   const mediumPriorityItems = dashboardItems.filter(item => item.priority === "medium")
 

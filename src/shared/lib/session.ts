@@ -1,7 +1,5 @@
-export enum Role {
-  ADMIN = 'ADMIN',
-  INMOBILIARIA = 'INMOBILIARIA',
-}
+const ADMIN = 'ADMIN';
+const INMOBILIARIA = 'INMOBILIARIA';
 
 export const getUserRole = (): string =>
   sessionStorage.getItem('user_role') ?? '';
@@ -12,7 +10,7 @@ export const getInmobiliariaId = (): string | null => {
 };
 
 export const isAdmin = (): boolean =>
-  getUserRole() === Role.ADMIN;
+  getUserRole() === ADMIN;
 
 export const isInmobiliaria = (): boolean =>
-  getUserRole() === Role.INMOBILIARIA;
+  getUserRole() === INMOBILIARIA;

@@ -62,6 +62,11 @@ export const useDeleteContract = () => {
         mutationFn: (id: string) => deleteContract(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            queryClient.invalidateQueries({ queryKey: ['tenants'] });
+            queryClient.invalidateQueries({ queryKey: ['properties'] });
+            queryClient.invalidateQueries({ queryKey: ['payments'] });
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             toast.success("Contrato eliminado exitosamente");
         },
         onError: (error) => {

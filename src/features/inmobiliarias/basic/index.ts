@@ -1,6 +1,7 @@
 // Types
 export type {
     Inmobiliaria,
+    InmobiliariaDisponible,
     InmobiliariaEstado,
     CreateInmobiliariaDto,
     UpdateInmobiliariaDto,
@@ -9,6 +10,7 @@ export type {
 // Services
 export {
     getInmobiliarias,
+    getInmobiliariasDisponibles,
     getInmobiliariaById,
     createInmobiliaria,
     updateInmobiliaria,
@@ -17,6 +19,7 @@ export {
 
 // Queries
 export { useInmobiliarias } from './query/inmobiliarias';
+export { useInmobiliariasDisponibles } from './query/inmobiliarias-disponibles';
 
 export {
     useInmobiliaria,
