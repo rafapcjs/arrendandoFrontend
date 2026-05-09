@@ -1,5 +1,6 @@
 import { ApiIntance } from "../../../../infrastructure/api";
-import type { 
+import { getInmobiliariaId } from "../../../../shared/lib/session";
+import type {
     Property,
     PropertiesResponse,
     CreatePropertyDto,
@@ -37,24 +38,32 @@ export const getPropertyById = async (id: string): Promise<Property> => {
 
 export const createProperty = async (propertyData: CreatePropertyDto): Promise<Property> => {
     try {
+        const inmobiliariaId = propertyData.inmobiliariaId || getInmobiliariaId() || undefined;
+        const data$ = { ...propertyData, inmobiliariaId };
         let payload: CreatePropertyDto | FormData;
 
-        if (propertyData.foto) {
+        if (data$.foto) {
             const formData = new FormData();
-            formData.append('direccion', propertyData.direccion);
-            formData.append('codigoServicioAgua', propertyData.codigoServicioAgua);
-            formData.append('codigoServicioGas', propertyData.codigoServicioGas);
-            formData.append('codigoServicioLuz', propertyData.codigoServicioLuz);
-            if (propertyData.disponible !== undefined) {
-                formData.append('disponible', propertyData.disponible.toString());
+            formData.append('direccion', data$.direccion);
+            formData.append('codigoServicioAgua', data$.codigoServicioAgua);
+            formData.append('codigoServicioGas', data$.codigoServicioGas);
+            formData.append('codigoServicioLuz', data$.codigoServicioLuz);
+            if (data$.disponible !== undefined) {
+                formData.append('disponible', data$.disponible.toString());
             }
-            if (propertyData.descripcion) {
-                formData.append('descripcion', propertyData.descripcion);
+            if (data$.descripcion) {
+                formData.append('descripcion', data$.descripcion);
             }
-            formData.append('foto', propertyData.foto);
+            if (data$.propietarioId) {
+                formData.append('propietarioId', data$.propietarioId);
+            }
+            if (data$.inmobiliariaId) {
+                formData.append('inmobiliariaId', data$.inmobiliariaId);
+            }
+            formData.append('foto', data$.foto);
             payload = formData;
         } else {
-            payload = propertyData;
+            payload = data$;
         }
 
         const { data } = await ApiIntance.post<Property>("/properties", payload);

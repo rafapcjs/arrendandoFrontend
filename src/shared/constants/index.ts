@@ -2,6 +2,8 @@
 export const API_ENDPOINTS = {
   AUTH: '/auth',
   USERS: '/users',
+  PROPIETARIOS: '/propietarios',
+  INMOBILIARIAS: '/inmobiliarias',
   PROPERTIES: '/properties',
   TENANTS: '/tenants',
   CONTRACTS: '/contratos',
@@ -13,6 +15,8 @@ export const ROUTES = {
   HOME: '/',
   DASHBOARD: '/dashboard',
   ADMIN: '/admin',
+  PROPIETARIOS: '/propietarios',
+  INMOBILIARIAS: '/inmobiliarias',
   TENANTS: '/tenants',
   PROPERTIES: '/properties',
   CONTRACTS: '/contracts',
@@ -24,6 +28,8 @@ export const ROUTES = {
 export const QUERY_KEYS = {
   AUTH: ['auth'],
   USERS: ['users'],
+  PROPIETARIOS: ['propietarios'],
+  INMOBILIARIAS: ['inmobiliarias'],
   PROPERTIES: ['properties'],
   TENANTS: ['tenants'],
   CONTRACTS: ['contracts'],

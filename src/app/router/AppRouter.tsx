@@ -3,6 +3,8 @@ import { ProtectedRoute } from "../../shared/components/common/ProtectedRoute";
 import { LoginForm } from "../../pages/login";
 import { DashboardGrid } from "../../pages/dashboard";
 import { AdminPanel } from "../../features/admin/basic/components/AdminPanel";
+import { PropietarioPanel } from "../../features/propietarios/basic";
+import { InmobiliariaPanel } from "../../features/inmobiliarias/basic";
 import { TenantPanel } from "../../features/tenants/basic";
 import { PropertyPanel } from "../../features/properties/basic";
 import { ContractPanel } from "../../features/contracts/basic";
@@ -38,6 +40,26 @@ export function AppRouter() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminPanel />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Panel de propietarios */}
+        <Route
+          path={ROUTES.PROPIETARIOS}
+          element={
+            <ProtectedRoute>
+              <PropietarioPanel />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Panel de inmobiliarias */}
+        <Route
+          path={ROUTES.INMOBILIARIAS}
+          element={
+            <ProtectedRoute>
+              <InmobiliariaPanel />
             </ProtectedRoute>
           }
         />

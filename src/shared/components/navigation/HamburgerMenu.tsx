@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, Home, Users, UserCheck, Building2, FileText, LogOut, KeyRound, BarChart3, CreditCard } from "lucide-react";
+import { Menu, X, Home, Users, UserCheck, Building2, FileText, LogOut, KeyRound, BarChart3, CreditCard, User, Building } from "lucide-react";
 import { toast } from "react-toastify";
 import { cn } from "@/shared/lib/utils";
 import { ROUTES } from "@/shared/constants";
 import { useLogout, ChangePasswordModal } from "@/features/auth/basic";
+import { getUserRole } from "@/shared/lib/session";
 
 interface NavigationItem {
   name: string;
   icon: React.ComponentType<{ className?: string }>;
   href: string;
   description: string;
+  roles: string[];
 }
 
 const navigationItems: NavigationItem[] = [
@@ -18,43 +20,64 @@ const navigationItems: NavigationItem[] = [
     name: "Dashboard",
     icon: Home,
     href: ROUTES.DASHBOARD,
-    description: "Panel principal"
+    description: "Panel principal",
+    roles: ["ADMIN", "INMOBILIARIA"],
   },
   {
-    name: "Administradores",
+    name: "Usuarios",
     icon: Users,
     href: ROUTES.ADMIN,
-    description: "Gestionar administradores"
+    description: "Gestionar usuarios",
+    roles: ["ADMIN"],
+  },
+  {
+    name: "Inmobiliarias",
+    icon: Building,
+    href: ROUTES.INMOBILIARIAS,
+    description: "Gestionar inmobiliarias",
+    roles: ["ADMIN"],
+  },
+  {
+    name: "Propietarios",
+    icon: User,
+    href: ROUTES.PROPIETARIOS,
+    description: "Gestionar propietarios",
+    roles: ["INMOBILIARIA"],
   },
   {
     name: "Inquilinos",
     icon: UserCheck,
     href: ROUTES.TENANTS,
-    description: "Gestionar inquilinos"
+    description: "Gestionar inquilinos",
+    roles: ["INMOBILIARIA"],
   },
   {
     name: "Inmuebles",
     icon: Building2,
     href: ROUTES.PROPERTIES,
-    description: "Gestionar propiedades"
+    description: "Gestionar propiedades",
+    roles: ["INMOBILIARIA"],
   },
   {
     name: "Contratos",
     icon: FileText,
     href: ROUTES.CONTRACTS,
-    description: "Gestionar contratos"
+    description: "Gestionar contratos",
+    roles: ["INMOBILIARIA"],
   },
   {
     name: "Reportes",
     icon: BarChart3,
     href: ROUTES.REPORTS,
-    description: "Reportes de ingresos"
+    description: "Reportes de ingresos",
+    roles: ["INMOBILIARIA"],
   },
   {
     name: "Pagos",
     icon: CreditCard,
     href: ROUTES.PAYMENTS,
-    description: "Gestión de pagos y deudas"
+    description: "Gestión de pagos y deudas",
+    roles: ["INMOBILIARIA"],
   },
 ];
 
@@ -64,6 +87,8 @@ export function HamburgerMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   const logoutMutation = useLogout();
+  const role = getUserRole();
+  const visibleItems = navigationItems.filter(item => item.roles.includes(role));
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -160,7 +185,7 @@ export function HamburgerMenu() {
 
         {/* Navigation Items */}
         <nav className="p-4 space-y-2">
-          {navigationItems.map((item) => {
+          {visibleItems.map((item) => {
             const Icon = item.icon;
             const isActive = isActiveRoute(item.href);
             

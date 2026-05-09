@@ -14,6 +14,7 @@ export const useLogin = () => {
       if (data?.access_token && data?.user) {
         sessionStorage.setItem('access_token', data.access_token);
         sessionStorage.setItem('user_role', data.user.role);
+        sessionStorage.setItem('inmobiliaria_id', data.user.inmobiliariaId ?? '');
         toast.success("Inicio de sesión exitoso");
         navigate('/dashboard');
       }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAdminUsers } from '../query/users';
 import { useAdminUpdateUser, useAdminActivateUser, useAdminDeleteUser } from '../query/user';
 import { useRegister } from '../../../auth/basic/query/register';
+import { useInmobiliarias } from '../../../inmobiliarias/basic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../../shared/components/ui/card';
 import { Button } from '../../../../shared/components/ui/button';
 import { Input } from '../../../../shared/components/ui/input';
@@ -25,6 +26,8 @@ export const AdminUserManagement = () => {
         password: '',
         role: 'ADMIN'
     });
+
+    const { data: inmobiliarias } = useInmobiliarias();
 
     const { data: usersData, isLoading, error } = useAdminUsers(page, limit);
     const updateUserMutation = useAdminUpdateUser();
@@ -88,15 +91,13 @@ export const AdminUserManagement = () => {
 
     const handleRegister = async () => {
         try {
-            await registerMutation.mutateAsync(registerForm);
+            const payload: CreateAdminDto = { ...registerForm };
+            if (payload.role !== 'INMOBILIARIA') {
+                delete payload.inmobiliariaId;
+            }
+            await registerMutation.mutateAsync(payload);
             setShowRegisterModal(false);
-            setRegisterForm({
-                firstName: '',
-                lastName: '',
-                email: '',
-                password: '',
-                role: 'ADMIN'
-            });
+            setRegisterForm({ firstName: '', lastName: '', email: '', password: '', role: 'ADMIN' });
         } catch (error) {
             console.error('Error registering user:', error);
         }
@@ -331,32 +332,63 @@ export const AdminUserManagement = () => {
                             />
                         </div>
                         
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                            <Label className="text-blue-800 font-medium">Rol</Label>
-                            <p className="text-sm text-blue-600 mt-1">ADMIN (Administrador del sistema)</p>
+                        <div>
+                            <Label htmlFor="regRole">Rol *</Label>
+                            <select
+                                id="regRole"
+                                value={registerForm.role}
+                                onChange={(e) => setRegisterForm(prev => ({
+                                    ...prev,
+                                    role: e.target.value as 'ADMIN' | 'INMOBILIARIA',
+                                    inmobiliariaId: undefined
+                                }))}
+                                className="w-full px-3 py-2 border border-input rounded-md"
+                            >
+                                <option value="ADMIN">ADMIN</option>
+                                <option value="INMOBILIARIA">INMOBILIARIA</option>
+                            </select>
                         </div>
+
+                        {registerForm.role === 'INMOBILIARIA' && (
+                            <div>
+                                <Label htmlFor="regInmobiliaria">Inmobiliaria *</Label>
+                                <select
+                                    id="regInmobiliaria"
+                                    value={registerForm.inmobiliariaId || ''}
+                                    onChange={(e) => setRegisterForm(prev => ({ ...prev, inmobiliariaId: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-input rounded-md"
+                                    required
+                                >
+                                    <option value="">Selecciona una inmobiliaria</option>
+                                    {(inmobiliarias ?? []).filter(i => i.estado === 'ACTIVA').map((i) => (
+                                        <option key={i.id} value={i.id}>{i.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                     </div>
-                    
+
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowRegisterModal(false);
-                                setRegisterForm({
-                                    firstName: '',
-                                    lastName: '',
-                                    email: '',
-                                    password: '',
-                                    role: 'ADMIN'
-                                });
+                                setRegisterForm({ firstName: '', lastName: '', email: '', password: '', role: 'ADMIN' });
                             }}
                             disabled={registerMutation.isPending}
                         >
                             Cancelar
                         </Button>
-                        <Button 
+                        <Button
                             onClick={handleRegister}
-                            disabled={registerMutation.isPending || !registerForm.firstName || !registerForm.lastName || !registerForm.email || !registerForm.password}
+                            disabled={
+                                registerMutation.isPending ||
+                                !registerForm.firstName ||
+                                !registerForm.lastName ||
+                                !registerForm.email ||
+                                !registerForm.password ||
+                                (registerForm.role === 'INMOBILIARIA' && !registerForm.inmobiliariaId)
+                            }
                             className="bg-green-600 hover:bg-green-700"
                         >
                             {registerMutation.isPending ? 'Registrando...' : 'Registrar Usuario'}

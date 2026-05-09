@@ -10,8 +10,12 @@ import type { Property, UpdatePropertyDto, CreatePropertyDto, PropertySearchPara
 import { checkPropertyHasActiveContract } from '../../../contracts/basic/service';
 import { toast } from 'react-toastify';
 import { confirmDialog } from '../../../../shared/lib/confirmDialog';
+import { isAdmin } from '../../../../shared/lib/session';
+import { useInmobiliarias } from '../../../inmobiliarias/basic';
+import { usePropietarios } from '../../../propietarios/basic';
 
 export const PropertyManagement = () => {
+    const adminUser = isAdmin();
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [editingProperty, setEditingProperty] = useState<Property | null>(null);
@@ -27,6 +31,9 @@ export const PropertyManagement = () => {
         disponible: true,
         descripcion: ''
     });
+
+    const { data: inmobiliarias } = useInmobiliarias();
+    const { data: propietarios } = usePropietarios();
     const [createPhotoPreview, setCreatePhotoPreview] = useState<string | null>(null);
     const [searchParams, setSearchParams] = useState<PropertySearchParams>({
         page: 1,
@@ -151,7 +158,9 @@ export const PropertyManagement = () => {
                 codigoServicioGas: '',
                 codigoServicioLuz: '',
                 disponible: true,
-                descripcion: ''
+                descripcion: '',
+                propietarioId: undefined,
+                inmobiliariaId: undefined,
             });
             setCreatePhotoPreview(null);
         } catch (error) {
@@ -441,6 +450,38 @@ export const PropertyManagement = () => {
                     </DialogHeader>
                     
                     <div className="space-y-4 p-6 max-h-96 overflow-y-auto">
+                        {adminUser && (
+                            <div>
+                                <Label htmlFor="createInmobiliariaProperty">Inmobiliaria *</Label>
+                                <select
+                                    id="createInmobiliariaProperty"
+                                    value={createForm.inmobiliariaId || ''}
+                                    onChange={(e) => setCreateForm(prev => ({ ...prev, inmobiliariaId: e.target.value, propietarioId: undefined }))}
+                                    className="w-full px-3 py-2 border border-input rounded-md"
+                                >
+                                    <option value="">Selecciona una inmobiliaria</option>
+                                    {(inmobiliarias ?? []).filter(i => i.estado === 'ACTIVA').map((i) => (
+                                        <option key={i.id} value={i.id}>{i.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                        <div>
+                            <Label htmlFor="createPropietario">Propietario *</Label>
+                            <select
+                                id="createPropietario"
+                                value={createForm.propietarioId || ''}
+                                onChange={(e) => setCreateForm(prev => ({ ...prev, propietarioId: e.target.value }))}
+                                className="w-full px-3 py-2 border border-input rounded-md"
+                            >
+                                <option value="">Selecciona un propietario</option>
+                                {(propietarios ?? [])
+                                    .filter(p => p.isActive && (!adminUser || !createForm.inmobiliariaId || p.inmobiliariaId === createForm.inmobiliariaId))
+                                    .map((p) => (
+                                        <option key={p.id} value={p.id}>{p.nombre} — {p.documento}</option>
+                                    ))}
+                            </select>
+                        </div>
                         <div>
                             <Label htmlFor="createDireccion">Dirección *</Label>
                             <Input
@@ -536,9 +577,17 @@ export const PropertyManagement = () => {
                         >
                             Cancelar
                         </Button>
-                        <Button 
+                        <Button
                             onClick={handleCreate}
-                            disabled={createPropertyMutation.isPending || !createForm.direccion || !createForm.codigoServicioAgua || !createForm.codigoServicioGas || !createForm.codigoServicioLuz}
+                            disabled={
+                                createPropertyMutation.isPending ||
+                                !createForm.direccion ||
+                                !createForm.codigoServicioAgua ||
+                                !createForm.codigoServicioGas ||
+                                !createForm.codigoServicioLuz ||
+                                !createForm.propietarioId ||
+                                (adminUser && !createForm.inmobiliariaId)
+                            }
                             className="bg-purple-600 hover:bg-purple-700"
                         >
                             {createPropertyMutation.isPending ? 'Registrando...' : 'Registrar Inmueble'}

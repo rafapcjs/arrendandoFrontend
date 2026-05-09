@@ -27,6 +27,8 @@ export interface CreatePropertyDto {
     disponible?: boolean;
     descripcion?: string;
     foto?: File;
+    propietarioId?: string;
+    inmobiliariaId?: string;
 }
 
 export interface UpdatePropertyDto {

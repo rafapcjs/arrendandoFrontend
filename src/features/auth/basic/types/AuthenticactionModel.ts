@@ -15,7 +15,8 @@ export interface CreateAdminDto {
     lastName: string;
     email: string;
     password: string;
-    role: "ADMIN";
+    role: "ADMIN" | "INMOBILIARIA";
+    inmobiliariaId?: string;
 }
 
 export interface UserProfile {
@@ -24,6 +25,7 @@ export interface UserProfile {
     lastName: string;
     email: string;
     role: string;
+    inmobiliariaId: string | null;
     createdAt: string;
 }
 

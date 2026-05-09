@@ -9,15 +9,15 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: () => Logout(),
     onSuccess: () => {
-      sessionStorage.removeItem('access_token');
-      sessionStorage.removeItem('user_role');
+      sessionStorage.clear();
+      localStorage.clear();
       toast.success("Sesión cerrada exitosamente");
       navigate('/');
     },
     onError: (error) => {
       console.error('Logout error:', error);
-      sessionStorage.removeItem('access_token');
-      sessionStorage.removeItem('user_role');
+      sessionStorage.clear();
+      localStorage.clear();
       toast.error("Error al cerrar sesión");
       navigate('/');
     },
