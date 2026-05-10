@@ -15,6 +15,7 @@ export const ROUTES = {
   HOME: '/',
   DASHBOARD: '/dashboard',
   ADMIN: '/admin',
+  USERS: '/users',
   PROPIETARIOS: '/propietarios',
   INMOBILIARIAS: '/inmobiliarias',
   TENANTS: '/tenants',

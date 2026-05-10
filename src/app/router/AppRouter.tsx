@@ -44,6 +44,16 @@ export function AppRouter() {
           }
         />
 
+        {/* Gestión de usuarios - Solo para admins */}
+        <Route
+          path={ROUTES.USERS}
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminPanel />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Panel de propietarios */}
         <Route
           path={ROUTES.PROPIETARIOS}
