@@ -7,6 +7,8 @@ export interface Property {
     disponible: boolean;
     descripcion: string;
     fotoUrl?: string;
+    propietarioId?: string;
+    propietario?: { id: string; nombre: string; documento: string };
     createdAt: string;
     updatedAt: string;
 }

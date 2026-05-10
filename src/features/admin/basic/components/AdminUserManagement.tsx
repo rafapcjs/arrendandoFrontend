@@ -28,12 +28,40 @@ export const AdminUserManagement = () => {
     });
 
     const { data: inmobiliarias } = useInmobiliariasDisponibles();
+    const [registerErrors, setRegisterErrors] = useState<Record<string, string>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
     const { data: usersData, isLoading, error } = useAdminUsers(page, limit);
     const updateUserMutation = useAdminUpdateUser();
     const activateUserMutation = useAdminActivateUser();
     const deleteUserMutation = useAdminDeleteUser();
     const registerMutation = useRegister();
+
+    const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    const validateRegisterForm = (): boolean => {
+        const errs: Record<string, string> = {};
+        if (!registerForm.firstName.trim()) errs.firstName = 'El nombre es requerido';
+        if (!registerForm.lastName.trim()) errs.lastName = 'El apellido es requerido';
+        if (!registerForm.email.trim()) errs.email = 'El correo es requerido';
+        else if (!validateEmail(registerForm.email)) errs.email = 'Ingresa un correo válido';
+        if (!registerForm.password) errs.password = 'La contraseña es requerida';
+        else if (registerForm.password.length < 8) errs.password = 'Mínimo 8 caracteres';
+        if (registerForm.role === 'INMOBILIARIA' && !registerForm.inmobiliariaId) errs.inmobiliariaId = 'Selecciona una inmobiliaria';
+        setRegisterErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const validateEditForm = (): boolean => {
+        const errs: Record<string, string> = {};
+        if (!editForm.firstName?.trim()) errs.firstName = 'El nombre es requerido';
+        if (!editForm.lastName?.trim()) errs.lastName = 'El apellido es requerido';
+        if (!editForm.email?.trim()) errs.email = 'El correo es requerido';
+        else if (!validateEmail(editForm.email!)) errs.email = 'Ingresa un correo válido';
+        if (!editForm.role?.trim()) errs.role = 'El rol es requerido';
+        setEditErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
 
     const handleEdit = (user: User) => {
         setEditingUser(user);
@@ -48,7 +76,7 @@ export const AdminUserManagement = () => {
 
     const handleUpdate = async () => {
         if (!editingUser) return;
-        
+        if (!validateEditForm()) return;
         try {
             await updateUserMutation.mutateAsync({
                 id: editingUser.id,
@@ -90,6 +118,7 @@ export const AdminUserManagement = () => {
     };
 
     const handleRegister = async () => {
+        if (!validateRegisterForm()) return;
         try {
             const payload: CreateAdminDto = { ...registerForm };
             if (payload.role !== 'INMOBILIARIA') {
@@ -293,8 +322,9 @@ export const AdminUserManagement = () => {
                                     value={registerForm.firstName}
                                     onChange={(e) => setRegisterForm(prev => ({ ...prev, firstName: e.target.value }))}
                                     placeholder="Nombre"
-                                    required
+                                    className={registerErrors.firstName ? 'border-red-500' : ''}
                                 />
+                                {registerErrors.firstName && <p className="text-red-500 text-xs mt-1">{registerErrors.firstName}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="regLastName">Apellido *</Label>
@@ -303,11 +333,12 @@ export const AdminUserManagement = () => {
                                     value={registerForm.lastName}
                                     onChange={(e) => setRegisterForm(prev => ({ ...prev, lastName: e.target.value }))}
                                     placeholder="Apellido"
-                                    required
+                                    className={registerErrors.lastName ? 'border-red-500' : ''}
                                 />
+                                {registerErrors.lastName && <p className="text-red-500 text-xs mt-1">{registerErrors.lastName}</p>}
                             </div>
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="regEmail">Email *</Label>
                             <Input
@@ -316,10 +347,11 @@ export const AdminUserManagement = () => {
                                 value={registerForm.email}
                                 onChange={(e) => setRegisterForm(prev => ({ ...prev, email: e.target.value }))}
                                 placeholder="admin@ejemplo.com"
-                                required
+                                className={registerErrors.email ? 'border-red-500' : ''}
                             />
+                            {registerErrors.email && <p className="text-red-500 text-xs mt-1">{registerErrors.email}</p>}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="regPassword">Contraseña *</Label>
                             <Input
@@ -327,11 +359,12 @@ export const AdminUserManagement = () => {
                                 type="password"
                                 value={registerForm.password}
                                 onChange={(e) => setRegisterForm(prev => ({ ...prev, password: e.target.value }))}
-                                placeholder="Contraseña segura"
-                                required
+                                placeholder="Contraseña segura (mín. 8 caracteres)"
+                                className={registerErrors.password ? 'border-red-500' : ''}
                             />
+                            {registerErrors.password && <p className="text-red-500 text-xs mt-1">{registerErrors.password}</p>}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="regRole">Rol *</Label>
                             <select
@@ -356,14 +389,14 @@ export const AdminUserManagement = () => {
                                     id="regInmobiliaria"
                                     value={registerForm.inmobiliariaId || ''}
                                     onChange={(e) => setRegisterForm(prev => ({ ...prev, inmobiliariaId: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-input rounded-md"
-                                    required
+                                    className={`w-full px-3 py-2 border rounded-md ${registerErrors.inmobiliariaId ? 'border-red-500' : 'border-input'}`}
                                 >
                                     <option value="">Selecciona una inmobiliaria</option>
                                     {(inmobiliarias ?? []).filter(i => i.estado === 'ACTIVA').map((i) => (
                                         <option key={i.id} value={i.id}>{i.nombre}</option>
                                     ))}
                                 </select>
+                                {registerErrors.inmobiliariaId && <p className="text-red-500 text-xs mt-1">{registerErrors.inmobiliariaId}</p>}
                             </div>
                         )}
                     </div>
@@ -373,6 +406,7 @@ export const AdminUserManagement = () => {
                             variant="outline"
                             onClick={() => {
                                 setShowRegisterModal(false);
+                                setRegisterErrors({});
                                 setRegisterForm({ firstName: '', lastName: '', email: '', password: '', role: 'ADMIN' });
                             }}
                             disabled={registerMutation.isPending}
@@ -416,8 +450,9 @@ export const AdminUserManagement = () => {
                                     value={editForm.firstName || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
                                     placeholder="Nombre"
-                                    required
+                                    className={editErrors.firstName ? 'border-red-500' : ''}
                                 />
+                                {editErrors.firstName && <p className="text-red-500 text-xs mt-1">{editErrors.firstName}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="editLastName">Apellido *</Label>
@@ -426,11 +461,12 @@ export const AdminUserManagement = () => {
                                     value={editForm.lastName || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
                                     placeholder="Apellido"
-                                    required
+                                    className={editErrors.lastName ? 'border-red-500' : ''}
                                 />
+                                {editErrors.lastName && <p className="text-red-500 text-xs mt-1">{editErrors.lastName}</p>}
                             </div>
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="editEmail">Email *</Label>
                             <Input
@@ -439,10 +475,11 @@ export const AdminUserManagement = () => {
                                 value={editForm.email || ''}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                                 placeholder="email@ejemplo.com"
-                                required
+                                className={editErrors.email ? 'border-red-500' : ''}
                             />
+                            {editErrors.email && <p className="text-red-500 text-xs mt-1">{editErrors.email}</p>}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="editRole">Rol *</Label>
                             <Input
@@ -450,10 +487,11 @@ export const AdminUserManagement = () => {
                                 value={editForm.role || ''}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, role: e.target.value }))}
                                 placeholder="ADMIN, USER, etc."
-                                required
+                                className={editErrors.role ? 'border-red-500' : ''}
                             />
+                            {editErrors.role && <p className="text-red-500 text-xs mt-1">{editErrors.role}</p>}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="editPassword">Nueva Contraseña (opcional)</Label>
                             <Input
@@ -464,20 +502,21 @@ export const AdminUserManagement = () => {
                                 placeholder="Dejar vacío para mantener la actual"
                             />
                         </div>
-                        
+
                         <div className="bg-blue-50 p-3 rounded-lg">
                             <Label className="text-blue-800 font-medium">Usuario Actual</Label>
                             <p className="text-sm text-blue-600 mt-1">{editingUser?.firstName} {editingUser?.lastName}</p>
                         </div>
                     </div>
-                    
+
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowEditModal(false);
                                 setEditingUser(null);
                                 setEditForm({});
+                                setEditErrors({});
                             }}
                             disabled={updateUserMutation.isPending}
                         >

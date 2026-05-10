@@ -34,6 +34,8 @@ export const ContractManagement = () => {
     });
     const [searchInput, setSearchInput] = useState('');
     const [activeSearchTerm, setActiveSearchTerm] = useState('');
+    const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
     // Get contracts without the inquilinoNombre filter (handle it in frontend)
     const backendSearchParams = {
@@ -85,7 +87,7 @@ export const ContractManagement = () => {
 
     const [expandedContractId, setExpandedContractId] = useState<string | null>(null);
     const [previewDoc, setPreviewDoc] = useState<ContratoDocumento | null>(null);
-    const [_previewContractId, setPreviewContractId] = useState<string | null>(null);
+    const [previewContractId, setPreviewContractId] = useState<string | null>(null);
     const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
     const [previewLoading, setPreviewLoading] = useState(false);
     const [replacingDoc, setReplacingDoc] = useState<{ contractId: string; docId: string } | null>(null);
@@ -115,21 +117,18 @@ export const ContractManagement = () => {
 
     const handleUpdate = async () => {
         if (!editingContract) return;
-        
-        // Validate dates if they are being updated
+
+        const errs: Record<string, string> = {};
         if (editForm.fechaInicio && editForm.fechaFin) {
             const startDate = new Date(editForm.fechaInicio);
             const endDate = new Date(editForm.fechaFin);
-            
-            if (startDate >= endDate) {
-                toast.error('La fecha de fin debe ser posterior a la fecha de inicio');
-                return;
-            }
+            if (startDate >= endDate) errs.fechaFin = 'La fecha de fin debe ser posterior a la fecha de inicio';
         }
-
-        // Validate canon mensual if it's being updated
         if (editForm.canonMensual !== undefined && editForm.canonMensual <= 0) {
-            toast.error('El canon mensual debe ser mayor a 0');
+            errs.canonMensual = 'El canon mensual debe ser mayor a 0';
+        }
+        if (Object.keys(errs).length > 0) {
+            setEditErrors(errs);
             return;
         }
         
@@ -147,6 +146,7 @@ export const ContractManagement = () => {
             setShowEditModal(false);
             setEditingContract(null);
             setEditForm({});
+            setEditErrors({});
         } catch (error: unknown) {
             console.error('Error updating contract:', error);
         }
@@ -169,25 +169,19 @@ export const ContractManagement = () => {
     };
 
     const handleCreate = async () => {
-        // Validate required fields
-        if (!createForm.fechaInicio || !createForm.fechaFin || !createForm.canonMensual || 
-            !createForm.inquilinoId || !createForm.inmuebleId) {
-            toast.error('Por favor completa todos los campos requeridos');
-            return;
+        const errs: Record<string, string> = {};
+        if (!createForm.fechaInicio) errs.fechaInicio = 'La fecha de inicio es requerida';
+        if (!createForm.fechaFin) errs.fechaFin = 'La fecha de fin es requerida';
+        if (!createForm.canonMensual || createForm.canonMensual <= 0) errs.canonMensual = 'El canon mensual debe ser mayor a 0';
+        if (!createForm.inquilinoId) errs.inquilinoId = 'Selecciona un inquilino';
+        if (!createForm.inmuebleId) errs.inmuebleId = 'Selecciona una propiedad';
+        if (createForm.fechaInicio && createForm.fechaFin) {
+            const startDate = new Date(createForm.fechaInicio);
+            const endDate = new Date(createForm.fechaFin);
+            if (startDate >= endDate) errs.fechaFin = 'La fecha de fin debe ser posterior a la fecha de inicio';
         }
-
-        // Validate dates
-        const startDate = new Date(createForm.fechaInicio);
-        const endDate = new Date(createForm.fechaFin);
-        
-        if (startDate >= endDate) {
-            toast.error('La fecha de fin debe ser posterior a la fecha de inicio');
-            return;
-        }
-
-        // Validate canon mensual
-        if (createForm.canonMensual <= 0) {
-            toast.error('El canon mensual debe ser mayor a 0');
+        if (Object.keys(errs).length > 0) {
+            setCreateErrors(errs);
             return;
         }
 
@@ -288,6 +282,28 @@ export const ContractManagement = () => {
             toast.error('No se pudo cargar la vista previa');
         } finally {
             setPreviewLoading(false);
+        }
+    };
+
+    const handleDownload = async () => {
+        if (!previewDoc || !previewContractId) return;
+        try {
+            const { ApiIntance } = await import('../../../../infrastructure/api');
+            const res = await ApiIntance.get(
+                `/contratos/${previewContractId}/documentos/${previewDoc.docId}/stream`,
+                { responseType: 'blob' }
+            );
+            const blob = new Blob([res.data], { type: previewDoc.tipo });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = previewDoc.nombre;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch {
+            toast.error('No se pudo descargar el documento');
         }
     };
 
@@ -675,8 +691,9 @@ export const ContractManagement = () => {
                                     type="date"
                                     value={createForm.fechaInicio}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, fechaInicio: e.target.value }))}
-                                    required
+                                    className={createErrors.fechaInicio ? 'border-red-500' : ''}
                                 />
+                                {createErrors.fechaInicio && <p className="text-red-500 text-xs mt-1">{createErrors.fechaInicio}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="createFechaFin">Fecha de Fin *</Label>
@@ -685,11 +702,12 @@ export const ContractManagement = () => {
                                     type="date"
                                     value={createForm.fechaFin}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, fechaFin: e.target.value }))}
-                                    required
+                                    className={createErrors.fechaFin ? 'border-red-500' : ''}
                                 />
+                                {createErrors.fechaFin && <p className="text-red-500 text-xs mt-1">{createErrors.fechaFin}</p>}
                             </div>
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="createCanonMensual">Canon Mensual *</Label>
                             <Input
@@ -710,10 +728,11 @@ export const ContractManagement = () => {
                                     }
                                 }}
                                 placeholder="1500000.00"
-                                required
+                                className={createErrors.canonMensual ? 'border-red-500' : ''}
                             />
+                            {createErrors.canonMensual && <p className="text-red-500 text-xs mt-1">{createErrors.canonMensual}</p>}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="createEstado">Estado *</Label>
                             <select
@@ -721,21 +740,19 @@ export const ContractManagement = () => {
                                 value={createForm.estado}
                                 onChange={(e) => setCreateForm(prev => ({ ...prev, estado: e.target.value as ContratoEstado }))}
                                 className="w-full px-3 py-2 border border-input rounded-md"
-                                required
                             >
                                 <option value="BORRADOR">Borrador</option>
                                 <option value="ACTIVO">Activo</option>
                             </select>
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="createInquilino">Inquilino *</Label>
                             <select
                                 id="createInquilino"
                                 value={createForm.inquilinoId}
                                 onChange={(e) => setCreateForm(prev => ({ ...prev, inquilinoId: e.target.value }))}
-                                className="w-full px-3 py-2 border border-input rounded-md"
-                                required
+                                className={`w-full px-3 py-2 border rounded-md ${createErrors.inquilinoId ? 'border-red-500' : 'border-input'}`}
                             >
                                 <option value="">Seleccionar inquilino</option>
                                 {availableTenants.map((tenant) => (
@@ -744,16 +761,16 @@ export const ContractManagement = () => {
                                     </option>
                                 ))}
                             </select>
+                            {createErrors.inquilinoId && <p className="text-red-500 text-xs mt-1">{createErrors.inquilinoId}</p>}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="createInmueble">Propiedad *</Label>
                             <select
                                 id="createInmueble"
                                 value={createForm.inmuebleId}
                                 onChange={(e) => setCreateForm(prev => ({ ...prev, inmuebleId: e.target.value }))}
-                                className="w-full px-3 py-2 border border-input rounded-md"
-                                required
+                                className={`w-full px-3 py-2 border rounded-md ${createErrors.inmuebleId ? 'border-red-500' : 'border-input'}`}
                             >
                                 <option value="">Seleccionar propiedad</option>
                                 {availableProperties.map((property) => (
@@ -762,14 +779,16 @@ export const ContractManagement = () => {
                                     </option>
                                 ))}
                             </select>
+                            {createErrors.inmuebleId && <p className="text-red-500 text-xs mt-1">{createErrors.inmuebleId}</p>}
                         </div>
                     </div>
                     
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowCreateModal(false);
+                                setCreateErrors({});
                                 setCreateForm({
                                     fechaInicio: '',
                                     fechaFin: '',
@@ -808,7 +827,7 @@ export const ContractManagement = () => {
                                     size="sm"
                                     variant="outline"
                                     className="text-xs"
-                                    onClick={() => window.open(previewDoc.url, '_blank')}
+                                    onClick={handleDownload}
                                 >
                                     Descargar
                                 </Button>
@@ -844,7 +863,7 @@ export const ContractManagement = () => {
                             ) : (
                                 <div className="h-full flex flex-col items-center justify-center gap-3 text-gray-500">
                                     <p className="text-sm">No se pudo cargar la vista previa.</p>
-                                    <Button size="sm" onClick={() => window.open(previewDoc.url, '_blank')}>
+                                    <Button size="sm" onClick={handleDownload}>
                                         Descargar archivo
                                     </Button>
                                 </div>
@@ -858,14 +877,14 @@ export const ContractManagement = () => {
             <input
                 ref={uploadInputRef}
                 type="file"
-                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={handleUploadFileSelected}
             />
             <input
                 ref={replaceInputRef}
                 type="file"
-                accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={handleReplaceFileSelected}
             />
@@ -898,10 +917,12 @@ export const ContractManagement = () => {
                                     type="date"
                                     value={editForm.fechaFin || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, fechaFin: e.target.value }))}
+                                    className={editErrors.fechaFin ? 'border-red-500' : ''}
                                 />
+                                {editErrors.fechaFin && <p className="text-red-500 text-xs mt-1">{editErrors.fechaFin}</p>}
                             </div>
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="editCanonMensual">Canon Mensual</Label>
                             <Input
@@ -922,7 +943,9 @@ export const ContractManagement = () => {
                                     }
                                 }}
                                 placeholder="1500000.00"
+                                className={editErrors.canonMensual ? 'border-red-500' : ''}
                             />
+                            {editErrors.canonMensual && <p className="text-red-500 text-xs mt-1">{editErrors.canonMensual}</p>}
                         </div>
                         
                         <div>
@@ -974,12 +997,13 @@ export const ContractManagement = () => {
                     </div>
                     
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowEditModal(false);
                                 setEditingContract(null);
                                 setEditForm({});
+                                setEditErrors({});
                             }}
                             disabled={updateContractMutation.isPending}
                         >

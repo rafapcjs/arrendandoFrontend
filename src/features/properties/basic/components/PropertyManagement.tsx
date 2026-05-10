@@ -40,6 +40,8 @@ export const PropertyManagement = () => {
         limit
     });
     const [showSearch, setShowSearch] = useState(false);
+    const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
     // Use regular properties query by default, search query when searching
     const { data: propertiesData, isLoading, error } = useProperties(page, limit);
@@ -53,6 +55,28 @@ export const PropertyManagement = () => {
     const activatePropertyMutation = useActivateProperty();
     const deletePropertyMutation = useDeleteProperty();
     const createPropertyMutation = useCreateProperty();
+
+    const validateCreateForm = (): boolean => {
+        const errs: Record<string, string> = {};
+        if (adminUser && !createForm.inmobiliariaId) errs.inmobiliariaId = 'Selecciona una inmobiliaria';
+        if (!createForm.propietarioId) errs.propietarioId = 'Selecciona un propietario';
+        if (!createForm.direccion.trim()) errs.direccion = 'La dirección es requerida';
+        if (!createForm.codigoServicioAgua.trim()) errs.codigoServicioAgua = 'El código de agua es requerido';
+        if (!createForm.codigoServicioGas.trim()) errs.codigoServicioGas = 'El código de gas es requerido';
+        if (!createForm.codigoServicioLuz.trim()) errs.codigoServicioLuz = 'El código de luz es requerido';
+        setCreateErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const validateEditForm = (): boolean => {
+        const errs: Record<string, string> = {};
+        if (editForm.direccion !== undefined && !editForm.direccion?.trim()) errs.direccion = 'La dirección no puede estar vacía';
+        if (editForm.codigoServicioAgua !== undefined && !editForm.codigoServicioAgua?.trim()) errs.codigoServicioAgua = 'El código de agua no puede estar vacío';
+        if (editForm.codigoServicioGas !== undefined && !editForm.codigoServicioGas?.trim()) errs.codigoServicioGas = 'El código de gas no puede estar vacío';
+        if (editForm.codigoServicioLuz !== undefined && !editForm.codigoServicioLuz?.trim()) errs.codigoServicioLuz = 'El código de luz no puede estar vacío';
+        setEditErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
 
     const handleEdit = (property: Property) => {
         setEditingProperty(property);
@@ -94,7 +118,7 @@ export const PropertyManagement = () => {
 
     const handleUpdate = async () => {
         if (!editingProperty) return;
-        
+        if (!validateEditForm()) return;
         try {
             await updatePropertyMutation.mutateAsync({
                 id: editingProperty.id,
@@ -149,6 +173,7 @@ export const PropertyManagement = () => {
     };
 
     const handleCreate = async () => {
+        if (!validateCreateForm()) return;
         try {
             await createPropertyMutation.mutateAsync(createForm);
             setShowCreateModal(false);
@@ -299,6 +324,15 @@ export const PropertyManagement = () => {
                                                 {property.disponible ? 'Disponible' : 'No disponible'}
                                             </span>
                                         </div>
+                                        {(() => {
+                                            const propietario = property.propietario
+                                                ?? propietarios?.find(p => p.id === property.propietarioId);
+                                            return propietario ? (
+                                                <p className="text-sm text-purple-700">
+                                                    <span className="font-medium">Propietario:</span> {propietario.nombre}
+                                                </p>
+                                            ) : null;
+                                        })()}
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                                             <p className="text-gray-600"><span className="font-medium">Agua:</span> {property.codigoServicioAgua}</p>
                                             <p className="text-gray-600"><span className="font-medium">Gas:</span> {property.codigoServicioGas}</p>
@@ -457,13 +491,14 @@ export const PropertyManagement = () => {
                                     id="createInmobiliariaProperty"
                                     value={createForm.inmobiliariaId || ''}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, inmobiliariaId: e.target.value, propietarioId: undefined }))}
-                                    className="w-full px-3 py-2 border border-input rounded-md"
+                                    className={`w-full px-3 py-2 border rounded-md ${createErrors.inmobiliariaId ? 'border-red-500' : 'border-input'}`}
                                 >
                                     <option value="">Selecciona una inmobiliaria</option>
                                     {(inmobiliarias ?? []).filter(i => i.estado === 'ACTIVA').map((i) => (
                                         <option key={i.id} value={i.id}>{i.nombre}</option>
                                     ))}
                                 </select>
+                                {createErrors.inmobiliariaId && <p className="text-red-500 text-xs mt-1">{createErrors.inmobiliariaId}</p>}
                             </div>
                         )}
                         <div>
@@ -472,7 +507,7 @@ export const PropertyManagement = () => {
                                 id="createPropietario"
                                 value={createForm.propietarioId || ''}
                                 onChange={(e) => setCreateForm(prev => ({ ...prev, propietarioId: e.target.value }))}
-                                className="w-full px-3 py-2 border border-input rounded-md"
+                                className={`w-full px-3 py-2 border rounded-md ${createErrors.propietarioId ? 'border-red-500' : 'border-input'}`}
                             >
                                 <option value="">Selecciona un propietario</option>
                                 {(propietarios ?? [])
@@ -481,6 +516,7 @@ export const PropertyManagement = () => {
                                         <option key={p.id} value={p.id}>{p.nombre} — {p.documento}</option>
                                     ))}
                             </select>
+                            {createErrors.propietarioId && <p className="text-red-500 text-xs mt-1">{createErrors.propietarioId}</p>}
                         </div>
                         <div>
                             <Label htmlFor="createDireccion">Dirección *</Label>
@@ -489,10 +525,11 @@ export const PropertyManagement = () => {
                                 value={createForm.direccion}
                                 onChange={(e) => setCreateForm(prev => ({ ...prev, direccion: e.target.value }))}
                                 placeholder="Carrera 15 #85-32, Chapinero, Bogotá"
-                                required
+                                className={createErrors.direccion ? 'border-red-500' : ''}
                             />
+                            {createErrors.direccion && <p className="text-red-500 text-xs mt-1">{createErrors.direccion}</p>}
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <Label htmlFor="createAgua">Código Servicio Agua *</Label>
@@ -501,8 +538,9 @@ export const PropertyManagement = () => {
                                     value={createForm.codigoServicioAgua}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, codigoServicioAgua: e.target.value }))}
                                     placeholder="AG123456789"
-                                    required
+                                    className={createErrors.codigoServicioAgua ? 'border-red-500' : ''}
                                 />
+                                {createErrors.codigoServicioAgua && <p className="text-red-500 text-xs mt-1">{createErrors.codigoServicioAgua}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="createGas">Código Servicio Gas *</Label>
@@ -511,8 +549,9 @@ export const PropertyManagement = () => {
                                     value={createForm.codigoServicioGas}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, codigoServicioGas: e.target.value }))}
                                     placeholder="GS987654321"
-                                    required
+                                    className={createErrors.codigoServicioGas ? 'border-red-500' : ''}
                                 />
+                                {createErrors.codigoServicioGas && <p className="text-red-500 text-xs mt-1">{createErrors.codigoServicioGas}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="createLuz">Código Servicio Luz *</Label>
@@ -521,8 +560,9 @@ export const PropertyManagement = () => {
                                     value={createForm.codigoServicioLuz}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, codigoServicioLuz: e.target.value }))}
                                     placeholder="LZ456789123"
-                                    required
+                                    className={createErrors.codigoServicioLuz ? 'border-red-500' : ''}
                                 />
+                                {createErrors.codigoServicioLuz && <p className="text-red-500 text-xs mt-1">{createErrors.codigoServicioLuz}</p>}
                             </div>
                         </div>
                         
@@ -563,6 +603,7 @@ export const PropertyManagement = () => {
                             variant="outline"
                             onClick={() => {
                                 setShowCreateModal(false);
+                                setCreateErrors({});
                                 setCreateForm({
                                     direccion: '',
                                     codigoServicioAgua: '',
@@ -614,9 +655,11 @@ export const PropertyManagement = () => {
                                 value={editForm.direccion || ''}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, direccion: e.target.value }))}
                                 placeholder="Carrera 15 #85-32, Chapinero, Bogotá"
+                                className={editErrors.direccion ? 'border-red-500' : ''}
                             />
+                            {editErrors.direccion && <p className="text-red-500 text-xs mt-1">{editErrors.direccion}</p>}
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <Label htmlFor="editAgua">Código Servicio Agua</Label>
@@ -625,7 +668,9 @@ export const PropertyManagement = () => {
                                     value={editForm.codigoServicioAgua || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, codigoServicioAgua: e.target.value }))}
                                     placeholder="AG123456789"
+                                    className={editErrors.codigoServicioAgua ? 'border-red-500' : ''}
                                 />
+                                {editErrors.codigoServicioAgua && <p className="text-red-500 text-xs mt-1">{editErrors.codigoServicioAgua}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="editGas">Código Servicio Gas</Label>
@@ -634,7 +679,9 @@ export const PropertyManagement = () => {
                                     value={editForm.codigoServicioGas || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, codigoServicioGas: e.target.value }))}
                                     placeholder="GS987654321"
+                                    className={editErrors.codigoServicioGas ? 'border-red-500' : ''}
                                 />
+                                {editErrors.codigoServicioGas && <p className="text-red-500 text-xs mt-1">{editErrors.codigoServicioGas}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="editLuz">Código Servicio Luz</Label>
@@ -643,7 +690,9 @@ export const PropertyManagement = () => {
                                     value={editForm.codigoServicioLuz || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, codigoServicioLuz: e.target.value }))}
                                     placeholder="LZ456789123"
+                                    className={editErrors.codigoServicioLuz ? 'border-red-500' : ''}
                                 />
+                                {editErrors.codigoServicioLuz && <p className="text-red-500 text-xs mt-1">{editErrors.codigoServicioLuz}</p>}
                             </div>
                         </div>
                         
@@ -686,6 +735,7 @@ export const PropertyManagement = () => {
                                 setShowEditModal(false);
                                 setEditingProperty(null);
                                 setEditForm({});
+                                setEditErrors({});
                                 setEditPhotoPreview(null);
                             }}
                             disabled={updatePropertyMutation.isPending}

@@ -16,7 +16,8 @@
       "Bash(git push:*)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\rafa\\\\Desktop\\\\arrendando\\\\arrendandoFrontend\\\\src\\\\features\\\\properties\" -Recurse -File)",
       "Bash(Select-Object FullName)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\rafa\\\\Desktop\\\\arrendando\\\\arrendandoFrontend\\\\src\\\\features\\\\properties\" -Recurse -File | ForEach-Object { $_.FullName })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\rafa\\\\Desktop\\\\arrendando\\\\arrendandoFrontend\\\\src\\\\features\\\\properties\" -Recurse -File | ForEach-Object { $_.FullName })",
+      "Bash(Get-ChildItem *)"
     ],
     "deny": [],
     "ask": []

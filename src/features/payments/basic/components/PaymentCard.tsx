@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from '@/shared/components/ui/card';
-import { Calendar, DollarSign, Clock, CheckCircle, XCircle, User, Home } from 'lucide-react';
+import { Calendar, DollarSign, Clock, CheckCircle, XCircle, User, Home, Briefcase } from 'lucide-react';
 import type { Payment } from '../types/PaymentModel';
 import { formatCurrency, formatDate, getPaymentStatusColor, getPaymentStatusText } from '../service';
 
@@ -55,6 +55,12 @@ export const PaymentCard: React.FC<PaymentCardProps> = ({
                   <p className="text-sm text-slate-600 flex items-center gap-1">
                     <Home className="w-3.5 h-3.5" />
                     <span className="font-medium">Inmueble:</span> {payment.contrato.inmueble.direccion}
+                  </p>
+                )}
+                {payment.contrato?.inmueble?.propietario && (
+                  <p className="text-sm text-slate-600 flex items-center gap-1">
+                    <Briefcase className="w-3.5 h-3.5" />
+                    <span className="font-medium">Propietario:</span> {payment.contrato.inmueble.propietario.nombre}
                   </p>
                 )}
                 {!payment.contrato?.inquilino && !payment.contrato?.inmueble && (

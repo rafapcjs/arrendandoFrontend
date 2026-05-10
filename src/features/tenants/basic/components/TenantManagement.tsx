@@ -34,6 +34,8 @@ export const TenantManagement = () => {
         limit
     });
     const [showSearch, setShowSearch] = useState(false);
+    const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
     // Use regular tenants query by default, search query when searching
     const { data: tenantsData, isLoading, error } = useTenants(
@@ -50,6 +52,38 @@ export const TenantManagement = () => {
     const activateTenantMutation = useActivateTenant();
     const deleteTenantMutation = useDeleteTenant();
     const createTenantMutation = useCreateTenant();
+
+    const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    const validateCreateForm = (): boolean => {
+        const errs: Record<string, string> = {};
+        if (!createForm.cedula.trim()) errs.cedula = 'La cédula es requerida';
+        if (!createForm.nombres.trim()) errs.nombres = 'El nombre es requerido';
+        if (!createForm.apellidos.trim()) errs.apellidos = 'Los apellidos son requeridos';
+        if (!createForm.telefono.trim()) errs.telefono = 'El teléfono es requerido';
+        if (!createForm.correo.trim()) errs.correo = 'El correo es requerido';
+        else if (!validateEmail(createForm.correo)) errs.correo = 'Ingresa un correo válido';
+        if (!createForm.direccion.trim()) errs.direccion = 'La dirección es requerida';
+        if (!createForm.ciudad.trim()) errs.ciudad = 'La ciudad es requerida';
+        if (!createForm.contactoEmergencia.trim()) errs.contactoEmergencia = 'El contacto de emergencia es requerido';
+        setCreateErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
+
+    const validateEditForm = (): boolean => {
+        const errs: Record<string, string> = {};
+        if (!editForm.cedula?.trim()) errs.cedula = 'La cédula es requerida';
+        if (!editForm.nombres?.trim()) errs.nombres = 'El nombre es requerido';
+        if (!editForm.apellidos?.trim()) errs.apellidos = 'Los apellidos son requeridos';
+        if (!editForm.telefono?.trim()) errs.telefono = 'El teléfono es requerido';
+        if (!editForm.correo?.trim()) errs.correo = 'El correo es requerido';
+        else if (!validateEmail(editForm.correo!)) errs.correo = 'Ingresa un correo válido';
+        if (!editForm.direccion?.trim()) errs.direccion = 'La dirección es requerida';
+        if (!editForm.ciudad?.trim()) errs.ciudad = 'La ciudad es requerida';
+        if (!editForm.contactoEmergencia?.trim()) errs.contactoEmergencia = 'El contacto de emergencia es requerido';
+        setEditErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
 
     const handleEdit = (tenant: Tenant) => {
         setEditingTenant(tenant);
@@ -69,7 +103,7 @@ export const TenantManagement = () => {
 
     const handleUpdate = async () => {
         if (!editingTenant) return;
-        
+        if (!validateEditForm()) return;
         try {
             await updateTenantMutation.mutateAsync({
                 id: editingTenant.id,
@@ -123,6 +157,7 @@ export const TenantManagement = () => {
     };
 
     const handleCreate = async () => {
+        if (!validateCreateForm()) return;
         try {
             await createTenantMutation.mutateAsync(createForm);
             setShowCreateModal(false);
@@ -424,8 +459,9 @@ export const TenantManagement = () => {
                                     value={createForm.cedula}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, cedula: e.target.value }))}
                                     placeholder="Número de cédula"
-                                    required
+                                    className={createErrors.cedula ? 'border-red-500' : ''}
                                 />
+                                {createErrors.cedula && <p className="text-red-500 text-xs mt-1">{createErrors.cedula}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="createTelefono">Teléfono *</Label>
@@ -434,11 +470,12 @@ export const TenantManagement = () => {
                                     value={createForm.telefono}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, telefono: e.target.value }))}
                                     placeholder="Número de teléfono"
-                                    required
+                                    className={createErrors.telefono ? 'border-red-500' : ''}
                                 />
+                                {createErrors.telefono && <p className="text-red-500 text-xs mt-1">{createErrors.telefono}</p>}
                             </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label htmlFor="createNombres">Nombres *</Label>
@@ -447,8 +484,9 @@ export const TenantManagement = () => {
                                     value={createForm.nombres}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, nombres: e.target.value }))}
                                     placeholder="Nombres"
-                                    required
+                                    className={createErrors.nombres ? 'border-red-500' : ''}
                                 />
+                                {createErrors.nombres && <p className="text-red-500 text-xs mt-1">{createErrors.nombres}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="createApellidos">Apellidos *</Label>
@@ -457,11 +495,12 @@ export const TenantManagement = () => {
                                     value={createForm.apellidos}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, apellidos: e.target.value }))}
                                     placeholder="Apellidos"
-                                    required
+                                    className={createErrors.apellidos ? 'border-red-500' : ''}
                                 />
+                                {createErrors.apellidos && <p className="text-red-500 text-xs mt-1">{createErrors.apellidos}</p>}
                             </div>
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="createCorreo">Email *</Label>
                             <Input
@@ -470,10 +509,11 @@ export const TenantManagement = () => {
                                 value={createForm.correo}
                                 onChange={(e) => setCreateForm(prev => ({ ...prev, correo: e.target.value }))}
                                 placeholder="inquilino@ejemplo.com"
-                                required
+                                className={createErrors.correo ? 'border-red-500' : ''}
                             />
+                            {createErrors.correo && <p className="text-red-500 text-xs mt-1">{createErrors.correo}</p>}
                         </div>
-                        
+
                         <div>
                             <Label htmlFor="createDireccion">Dirección *</Label>
                             <Input
@@ -481,10 +521,11 @@ export const TenantManagement = () => {
                                 value={createForm.direccion}
                                 onChange={(e) => setCreateForm(prev => ({ ...prev, direccion: e.target.value }))}
                                 placeholder="Dirección completa"
-                                required
+                                className={createErrors.direccion ? 'border-red-500' : ''}
                             />
+                            {createErrors.direccion && <p className="text-red-500 text-xs mt-1">{createErrors.direccion}</p>}
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label htmlFor="createCiudad">Ciudad *</Label>
@@ -493,8 +534,9 @@ export const TenantManagement = () => {
                                     value={createForm.ciudad}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, ciudad: e.target.value }))}
                                     placeholder="Ciudad"
-                                    required
+                                    className={createErrors.ciudad ? 'border-red-500' : ''}
                                 />
+                                {createErrors.ciudad && <p className="text-red-500 text-xs mt-1">{createErrors.ciudad}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="createContactoEmergencia">Contacto de Emergencia *</Label>
@@ -503,22 +545,24 @@ export const TenantManagement = () => {
                                     value={createForm.contactoEmergencia}
                                     onChange={(e) => setCreateForm(prev => ({ ...prev, contactoEmergencia: e.target.value }))}
                                     placeholder="Contacto de emergencia"
-                                    required
+                                    className={createErrors.contactoEmergencia ? 'border-red-500' : ''}
                                 />
+                                {createErrors.contactoEmergencia && <p className="text-red-500 text-xs mt-1">{createErrors.contactoEmergencia}</p>}
                             </div>
                         </div>
-                        
+
                         <div className="bg-green-50 p-3 rounded-lg">
                             <Label className="text-green-800 font-medium">Estado</Label>
                             <p className="text-sm text-green-600 mt-1">Activo (El inquilino estará activo por defecto)</p>
                         </div>
                     </div>
-                    
+
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowCreateModal(false);
+                                setCreateErrors({});
                                 setCreateForm({
                                     cedula: '',
                                     nombres: '',
@@ -559,101 +603,118 @@ export const TenantManagement = () => {
                     <div className="space-y-4 p-6 max-h-96 overflow-y-auto">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="editCedula">Cédula</Label>
+                                <Label htmlFor="editCedula">Cédula *</Label>
                                 <Input
                                     id="editCedula"
                                     value={editForm.cedula || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, cedula: e.target.value }))}
                                     placeholder="Número de cédula"
+                                    className={editErrors.cedula ? 'border-red-500' : ''}
                                 />
+                                {editErrors.cedula && <p className="text-red-500 text-xs mt-1">{editErrors.cedula}</p>}
                             </div>
                             <div>
-                                <Label htmlFor="editTelefono">Teléfono</Label>
+                                <Label htmlFor="editTelefono">Teléfono *</Label>
                                 <Input
                                     id="editTelefono"
                                     value={editForm.telefono || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, telefono: e.target.value }))}
                                     placeholder="Número de teléfono"
+                                    className={editErrors.telefono ? 'border-red-500' : ''}
                                 />
+                                {editErrors.telefono && <p className="text-red-500 text-xs mt-1">{editErrors.telefono}</p>}
                             </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="editNombres">Nombres</Label>
+                                <Label htmlFor="editNombres">Nombres *</Label>
                                 <Input
                                     id="editNombres"
                                     value={editForm.nombres || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, nombres: e.target.value }))}
                                     placeholder="Nombres"
+                                    className={editErrors.nombres ? 'border-red-500' : ''}
                                 />
+                                {editErrors.nombres && <p className="text-red-500 text-xs mt-1">{editErrors.nombres}</p>}
                             </div>
                             <div>
-                                <Label htmlFor="editApellidos">Apellidos</Label>
+                                <Label htmlFor="editApellidos">Apellidos *</Label>
                                 <Input
                                     id="editApellidos"
                                     value={editForm.apellidos || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, apellidos: e.target.value }))}
                                     placeholder="Apellidos"
+                                    className={editErrors.apellidos ? 'border-red-500' : ''}
                                 />
+                                {editErrors.apellidos && <p className="text-red-500 text-xs mt-1">{editErrors.apellidos}</p>}
                             </div>
                         </div>
-                        
+
                         <div>
-                            <Label htmlFor="editCorreo">Email</Label>
+                            <Label htmlFor="editCorreo">Email *</Label>
                             <Input
                                 id="editCorreo"
                                 type="email"
                                 value={editForm.correo || ''}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, correo: e.target.value }))}
                                 placeholder="inquilino@ejemplo.com"
+                                className={editErrors.correo ? 'border-red-500' : ''}
                             />
+                            {editErrors.correo && <p className="text-red-500 text-xs mt-1">{editErrors.correo}</p>}
                         </div>
-                        
+
                         <div>
-                            <Label htmlFor="editDireccion">Dirección</Label>
+                            <Label htmlFor="editDireccion">Dirección *</Label>
                             <Input
                                 id="editDireccion"
                                 value={editForm.direccion || ''}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, direccion: e.target.value }))}
                                 placeholder="Dirección completa"
+                                className={editErrors.direccion ? 'border-red-500' : ''}
                             />
+                            {editErrors.direccion && <p className="text-red-500 text-xs mt-1">{editErrors.direccion}</p>}
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="editCiudad">Ciudad</Label>
+                                <Label htmlFor="editCiudad">Ciudad *</Label>
                                 <Input
                                     id="editCiudad"
                                     value={editForm.ciudad || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, ciudad: e.target.value }))}
                                     placeholder="Ciudad"
+                                    className={editErrors.ciudad ? 'border-red-500' : ''}
                                 />
+                                {editErrors.ciudad && <p className="text-red-500 text-xs mt-1">{editErrors.ciudad}</p>}
                             </div>
                             <div>
-                                <Label htmlFor="editContactoEmergencia">Contacto de Emergencia</Label>
+                                <Label htmlFor="editContactoEmergencia">Contacto de Emergencia *</Label>
                                 <Input
                                     id="editContactoEmergencia"
                                     value={editForm.contactoEmergencia || ''}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, contactoEmergencia: e.target.value }))}
                                     placeholder="Contacto de emergencia"
+                                    className={editErrors.contactoEmergencia ? 'border-red-500' : ''}
                                 />
+                                {editErrors.contactoEmergencia && <p className="text-red-500 text-xs mt-1">{editErrors.contactoEmergencia}</p>}
                             </div>
                         </div>
-                        
+
                         <div className="bg-green-50 p-3 rounded-lg">
                             <Label className="text-green-800 font-medium">Inquilino Actual</Label>
                             <p className="text-sm text-green-600 mt-1">{editingTenant?.nombres} {editingTenant?.apellidos}</p>
                         </div>
                     </div>
-                    
+
                     <DialogFooter>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => {
                                 setShowEditModal(false);
                                 setEditingTenant(null);
                                 setEditForm({});
+                                setEditErrors({});
                             }}
                             disabled={updateTenantMutation.isPending}
                         >

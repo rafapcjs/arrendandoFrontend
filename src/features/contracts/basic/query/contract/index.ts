@@ -26,11 +26,13 @@ export const useCreateContract = () => {
     return useMutation({
         mutationFn: (data: CreateContractDto) => createContract(data),
         onSuccess: () => {
-            // Invalidate contracts query
             queryClient.invalidateQueries({ queryKey: ['contracts'] });
-            // Invalidate tenants and properties queries to refresh dropdowns
             queryClient.invalidateQueries({ queryKey: ['tenants'] });
             queryClient.invalidateQueries({ queryKey: ['properties'] });
+            queryClient.invalidateQueries({ queryKey: ['payments'] });
+            queryClient.invalidateQueries({ queryKey: ['payment-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             toast.success("Contrato creado exitosamente");
         },
         onError: (error) => {
@@ -72,6 +74,7 @@ export const useDeleteContract = () => {
             queryClient.invalidateQueries({ queryKey: ['tenants'] });
             queryClient.invalidateQueries({ queryKey: ['properties'] });
             queryClient.invalidateQueries({ queryKey: ['payments'] });
+            queryClient.invalidateQueries({ queryKey: ['payment-stats'] });
             queryClient.invalidateQueries({ queryKey: ['reports'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             toast.success("Contrato eliminado exitosamente");
@@ -92,6 +95,10 @@ export const useUploadContractDocument = () => {
         onSuccess: (updatedContract) => {
             queryClient.setQueryData(['contracts', updatedContract.id], updatedContract);
             queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            queryClient.invalidateQueries({ queryKey: ['payments'] });
+            queryClient.invalidateQueries({ queryKey: ['payment-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             toast.success("Documento subido exitosamente");
         },
         onError: () => {
@@ -109,6 +116,10 @@ export const useReplaceContractDocument = () => {
         onSuccess: (updatedContract) => {
             queryClient.setQueryData(['contracts', updatedContract.id], updatedContract);
             queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            queryClient.invalidateQueries({ queryKey: ['payments'] });
+            queryClient.invalidateQueries({ queryKey: ['payment-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             toast.success("Documento reemplazado exitosamente");
         },
         onError: () => {
@@ -126,6 +137,10 @@ export const useDeleteContractDocument = () => {
         onSuccess: (updatedContract) => {
             queryClient.setQueryData(['contracts', updatedContract.id], updatedContract);
             queryClient.invalidateQueries({ queryKey: ['contracts'] });
+            queryClient.invalidateQueries({ queryKey: ['payments'] });
+            queryClient.invalidateQueries({ queryKey: ['payment-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             toast.success("Documento eliminado exitosamente");
         },
         onError: () => {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, DollarSign } from 'lucide-react';
-import { toast } from 'react-toastify';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../shared/components/ui/dialog';
 import { Button } from '../../../../shared/components/ui/button';
 import { Input } from '../../../../shared/components/ui/input';
@@ -25,6 +24,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
   });
 
   const updatePaymentMutation = useUpdatePayment();
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (payment) {
@@ -50,14 +50,15 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
     
     if (!payment) return;
 
-    // Validate form data
+    const newErrors: Record<string, string> = {};
     if (!formData.montoTotal || formData.montoTotal <= 0) {
-      toast.error('El monto total debe ser mayor a 0');
-      return;
+      newErrors.montoTotal = 'El monto debe ser mayor a 0';
     }
-
     if (!formData.fechaPagoEsperada) {
-      toast.error('La fecha de pago esperada es requerida');
+      newErrors.fechaPagoEsperada = 'La fecha de pago es requerida';
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -91,6 +92,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
       fechaPagoEsperada: '',
       montoTotal: 0
     });
+    setErrors({});
     onClose();
   };
 
@@ -137,7 +139,9 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
                   min="0"
                   step="1000"
                   required
+                  className={errors.montoTotal ? 'border-red-500' : ''}
                 />
+                {errors.montoTotal && <p className="text-red-500 text-xs mt-1">{errors.montoTotal}</p>}
               </div>
 
               <div>
@@ -154,7 +158,9 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
                     fechaPagoEsperada: e.target.value
                   }))}
                   required
+                  className={errors.fechaPagoEsperada ? 'border-red-500' : ''}
                 />
+                {errors.fechaPagoEsperada && <p className="text-red-500 text-xs mt-1">{errors.fechaPagoEsperada}</p>}
               </div>
             </div>
           </div>

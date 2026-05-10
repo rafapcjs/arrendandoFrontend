@@ -9,12 +9,19 @@ export interface Tenant {
   correo?: string;
 }
 
+export interface Propietario {
+  id: string;
+  nombre: string;
+  documento?: string;
+}
+
 export interface Property {
   id: string;
   direccion: string;
   ciudad?: string;
   tipo?: string;
   valorArriendo?: string;
+  propietario?: Propietario;
 }
 
 export interface Contract {
