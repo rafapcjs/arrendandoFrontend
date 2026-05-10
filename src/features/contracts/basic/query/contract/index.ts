@@ -49,6 +49,10 @@ export const useUpdateContract = () => {
         onSuccess: (updatedContract) => {
             queryClient.invalidateQueries({ queryKey: ['contracts'] });
             queryClient.setQueryData(['contracts', updatedContract.id], updatedContract);
+            queryClient.invalidateQueries({ queryKey: ['payments'] });
+            queryClient.invalidateQueries({ queryKey: ['payment-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             toast.success("Contrato actualizado exitosamente");
         },
         onError: (error) => {

@@ -1,11 +1,6 @@
 import { Button } from "@/shared/components/ui/button"
 import { Card } from "@/shared/components/ui/card"
-import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
 import { useNavigate } from "react-router-dom"
-import { useState } from "react"
-import { toast } from "react-toastify"
-import { sendContactEmail } from "@/shared/services/contactService"
 import {
   Building2,
   Users,
@@ -25,64 +20,15 @@ import {
   Monitor,
   Database,
   Server,
-  Mail,
-  Send,
+  Building,
+  UserRound,
 } from "lucide-react"
 
 export default function LandingPage() {
   const navigate = useNavigate()
-  const [contactForm, setContactForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleLogin = () => {
     navigate('/login')
-  }
-
-  const handleContactSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Validaciones básicas
-    if (!contactForm.name.trim() || contactForm.name.length < 2) {
-      toast.error('El nombre debe tener al menos 2 caracteres')
-      return
-    }
-
-    if (!contactForm.email.trim() || !contactForm.email.includes('@')) {
-      toast.error('Debe proporcionar un correo electrónico válido')
-      return
-    }
-
-    if (!contactForm.phone.trim() || contactForm.phone.length < 7 || contactForm.phone.length > 20) {
-      toast.error('El teléfono debe tener entre 7 y 20 caracteres')
-      return
-    }
-
-    if (!contactForm.message.trim() || contactForm.message.length < 10) {
-      toast.error('El mensaje debe tener al menos 10 caracteres')
-      return
-    }
-
-    setIsSubmitting(true)
-    
-    try {
-      const response = await sendContactEmail(contactForm)
-      toast.success(response.message || '¡Mensaje enviado exitosamente! Te contactaremos pronto.')
-      setContactForm({ name: '', email: '', phone: '', message: '' })
-    } catch (error: any) {
-      const errorMessage = error.message || 'Error al enviar el mensaje. Por favor intenta nuevamente.'
-      toast.error(errorMessage)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleInputChange = (field: string, value: string) => {
-    setContactForm(prev => ({ ...prev, [field]: value }))
   }
 
   return (
@@ -149,7 +95,7 @@ export default function LandingPage() {
               <div className="text-sm text-slate-600 font-medium">Acceso Remoto</div>
             </div>
             <div className="text-center group">
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-green-700 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">7</div>
+              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-green-700 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">8</div>
               <div className="text-sm text-slate-600 font-medium">Módulos Integrados</div>
             </div>
             <div className="text-center group">
@@ -233,6 +179,26 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold text-slate-800 mb-3">Notificaciones Inteligentes</h3>
             <p className="text-slate-600 leading-relaxed">
               Alertas automáticas de vencimientos, recordatorios de pagos y eventos importantes.
+            </p>
+          </Card>
+
+          <Card className="p-8 hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-100 group hover:border-teal-300">
+            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-700 flex items-center justify-center mb-6 group-hover:rotate-6 transition-transform duration-300 shadow-xl">
+              <UserRound className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-3">Gestión de Propietarios</h3>
+            <p className="text-slate-600 leading-relaxed">
+              Registro y administración de propietarios con historial de inmuebles, contactos y documentación asociada.
+            </p>
+          </Card>
+
+          <Card className="p-8 hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-100 group hover:border-violet-300">
+            <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center mb-6 group-hover:rotate-6 transition-transform duration-300 shadow-xl">
+              <Building className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-3">Gestión de Inmobiliarias</h3>
+            <p className="text-slate-600 leading-relaxed">
+              Administración multi-empresa con control de inmobiliarias, usuarios y aislamiento total de información por organización.
             </p>
           </Card>
         </div>
@@ -441,146 +407,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Contact Form Section */}
-      <section id="contact" className="container mx-auto px-4 py-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-4 text-balance">
-              ¿Tienes preguntas? Contáctanos
-            </h2>
-            <p className="text-lg text-slate-600 text-pretty leading-relaxed">
-              Envíanos un mensaje y nuestro equipo te responderá lo antes posible
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* Contact Information */}
-            <div className="space-y-8">
-              <Card className="p-6 border-2 border-blue-200 hover:border-blue-300 transition-colors duration-300">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                    <Mail className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-800">Email</h3>
-                    <p className="text-slate-600">rafaelcorredorgambin1@gmail.com</p>
-                  </div>
-                </div>
-                <p className="text-sm text-slate-600">
-                  Respuesta garantizada en menos de 24 horas
-                </p>
-              </Card>
-
-              <div className="space-y-4">
-                <h3 className="text-xl font-bold text-slate-800">¿Por qué elegirnos?</h3>
-                <ul className="space-y-3">
-                  {[
-                    "Sistema 100% en la nube",
-                    "Sin necesidad de instalación",
-                    "Soporte técnico 24/7",
-                    "Seguridad de datos garantizada",
-                    "Actualizaciones automáticas",
-                    "Escalable según tu negocio"
-                  ].map((benefit, index) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-                      <span className="text-slate-600">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Contact Form */}
-            <Card className="p-8 border-2 border-slate-200 hover:border-blue-300 transition-colors duration-300 shadow-lg">
-              <form onSubmit={handleContactSubmit} className="space-y-6">
-                <div>
-                  <Label htmlFor="name" className="text-sm font-medium text-slate-800">
-                    Nombre completo *
-                  </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={contactForm.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Ingresa tu nombre completo"
-                    className="mt-2 border-2 border-slate-200 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email" className="text-sm font-medium text-slate-800">
-                    Correo electrónico *
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={contactForm.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="ejemplo@empresa.com"
-                    className="mt-2 border-2 border-slate-200 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="phone" className="text-sm font-medium text-slate-800">
-                    Teléfono *
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={contactForm.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="+57 300 123 4567"
-                    className="mt-2 border-2 border-slate-200 focus:border-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="message" className="text-sm font-medium text-slate-800">
-                    Mensaje *
-                  </Label>
-                  <textarea
-                    id="message"
-                    value={contactForm.message}
-                    onChange={(e) => handleInputChange('message', e.target.value)}
-                    placeholder="Cuéntanos sobre tu empresa y qué necesitas... (mínimo 10 caracteres)"
-                    rows={5}
-                    className="mt-2 w-full px-3 py-2 border-2 border-slate-200 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                    minLength={10}
-                    maxLength={1000}
-                  />
-                  <div className="text-xs text-slate-500 mt-1">
-                    {contactForm.message.length}/1000 caracteres
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Enviando...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Send className="h-4 w-4" />
-                      Enviar Mensaje
-                    </div>
-                  )}
-                </Button>
-              </form>
-            </Card>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-blue-600 via-indigo-700 to-blue-800 text-white py-20">
