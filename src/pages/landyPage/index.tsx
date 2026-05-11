@@ -22,6 +22,7 @@ import {
   Server,
   Building,
   UserRound,
+  MessageCircle,
 } from "lucide-react"
 
 export default function LandingPage() {
@@ -56,7 +57,7 @@ export default function LandingPage() {
               Contacto
             </a>
           </nav>
-          <Button onClick={handleLogin} className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg font-medium">Solicitar Demo</Button>
+          <Button onClick={handleLogin} className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg font-medium">Iniciar Sesión</Button>
         </div>
       </header>
 
@@ -76,11 +77,12 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button onClick={handleLogin} size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 text-base shadow-xl">
-              Comenzar Ahora
+              Iniciar Sesión
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="text-base bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-blue-300 hover:text-blue-700 shadow-lg">
-              Ver Demo en Vivo
+            <Button onClick={() => window.open('https://wa.me/573053283187?text=Hola%20requiero%20Arrendando,%20dame%20más%20información', '_blank')} size="lg" variant="outline" className="text-base bg-white border-2 border-slate-300 text-slate-700 hover:bg-green-50 hover:border-green-300 hover:text-green-700 shadow-lg">
+              <MessageCircle className="mr-2 h-5 w-5 text-green-600" />
+              Más Información
             </Button>
           </div>
         </div>
@@ -318,7 +320,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-lg font-bold text-slate-800 mb-2">Seguridad Avanzada</h3>
                 <p className="text-slate-600 text-sm leading-relaxed">
-                  JWT, control de roles, autenticación multifactor y auditoría completa de actividades
+                  JWT, control de roles, autenticación  y auditoría completa de actividades
                 </p>
               </div>
 
@@ -338,7 +340,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-lg font-bold text-slate-800 mb-2">Escalable y Modular</h3>
                 <p className="text-slate-600 text-sm leading-relaxed">
-                  Arquitectura microservicios que crece con tu negocio sin límites de usuarios o propiedades
+                  Arquitectura cliente servidor que crece con tu negocio sin límites de usuarios o propiedades
                 </p>
               </div>
             </div>
@@ -419,16 +421,17 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button onClick={handleLogin} size="lg" variant="secondary" className="text-base bg-white text-blue-700 hover:bg-slate-100 font-bold shadow-xl">
-              Solicitar Demo Gratuita
+              Iniciar Sesión
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button
-              onClick={handleLogin}
+              onClick={() => window.open('https://wa.me/573053283187?text=Hola%20requiero%20Arrendando,%20dame%20más%20información', '_blank')}
               size="lg"
               variant="outline"
-              className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-base font-bold shadow-lg"
+              className="bg-transparent border-2 border-white text-white hover:bg-green-500 hover:border-green-500 hover:text-white text-base font-bold shadow-lg transition-colors"
             >
-              Hablar con Ventas
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Más Información
             </Button>
           </div>
         </div>
@@ -543,6 +546,15 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Button */}
+      <button
+        onClick={() => window.open('https://wa.me/573053283187?text=Hola%20requiero%20Arrendando,%20dame%20más%20información', '_blank')}
+        className="fixed bottom-6 right-6 z-50 p-4 bg-green-500 text-white rounded-full shadow-2xl hover:bg-green-600 hover:scale-110 transition-all duration-300 focus:outline-none"
+        aria-label="Contactar por WhatsApp"
+      >
+        <MessageCircle className="h-8 w-8" />
+      </button>
     </div>
   )
 }
